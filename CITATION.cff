@@ -1,0 +1,19 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: NN_LF_Topology
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Clemens Martin
+    family-names: Müller
+    email: clemensm@stud.ntnu.no
+    affiliation: NTNU
+repository-code: 'https://github.com/clmu/NN_LF_topology'
+abstract: This is the abstract
+keywords:
+  - Neural networks
+commit: this is the commit
