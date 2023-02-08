@@ -13,10 +13,10 @@
 #       and/or other materials provided with the distribution.
 
 import numpy as np
-from ElkObjects import *
+from LF_3bus.ElkObjects import *
 import pandas as pd
 
-from ElkMenuFunctions import ViewFileName
+from LF_3bus.ElkMenuFunctions import ViewFileName
 
 def BuildSystem(file=None):
     def renumber(BusList, LineList):

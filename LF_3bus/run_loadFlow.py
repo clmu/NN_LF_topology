@@ -30,5 +30,6 @@ allangles = []
 for angle in bus4.voang:
     allangles.append(radToDeg(angle))
 
-
-
+for bus in range(len(bus4.BusList)):
+    print(f'voltage at bus {bus4.BusList[bus].busnum}: {bus4.vomag[bus]}')
+    print(f'angle at bus   {bus4.BusList[bus].busnum}: {allangles[bus]}\n')

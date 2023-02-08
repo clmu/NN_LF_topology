@@ -18,8 +18,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from numpy.linalg import inv as inv
 
-import ElkObjects
-from build_sys_from_sheet import *
+from LF_3bus.ElkObjects import *
+from LF_3bus.build_sys_from_sheet import *
 import time
 
 
