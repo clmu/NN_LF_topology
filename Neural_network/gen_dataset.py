@@ -9,6 +9,7 @@ import random as r
 import LF_3bus.ElkLoadFlow as elkLF
 import LF_3bus.build_sys_from_sheet as build
 import numpy as np
+import time as t
 
 def gen_data_4bus(upscaling_factor=1.1, learning_samples=10000, verification_samples=2000,
                   learning_file_name = 'learn', verification_file_name = 'verify', path = None):
@@ -63,6 +64,20 @@ def gen_data_4bus(upscaling_factor=1.1, learning_samples=10000, verification_sam
 
 def solve_input_data4bus(learn_filename, verification_filename, obj,  learn_output_filename,
                          verification_output_filename, path = None):
+    '''
+    Function that uses the function solve_nr from LF_3bus.ElkLoadFlow to solve all training and verification samples.
+    To conduct all calculations, a loadflow object is imported to the function. The loadflow object is imported once,
+    before each sample is solved: .vomag and .voang are formatted for flat start, and the randomly generated Ppowers and
+    Qpowers are stores within the object. After the loadflow solution this data is stored in an external NP array.
+    The generated data is stored as four .npz files.
+    :param learn_filename: filename of the input learning data
+    :param verification_filename: filename of the verification data.
+    :param obj: the load flow object used access the loadflow solver.
+    :param learn_output_filename: name of the output file for learning data.
+    :param verification_output_filename: name of the output file for the learning data.
+    :param path: path to the temporary folder if using. implemented to avoid mixing different data formats.
+    :return: None: stores data as .npz
+    '''
 
     if path is not None:
         learn_filename = path + learn_filename
@@ -84,6 +99,13 @@ def solve_input_data4bus(learn_filename, verification_filename, obj,  learn_outp
 
 
     def calc_loadflow(samples, storage, lf):
+        '''
+        Function to calculate the loadflow of each sample.
+        :param samples: number of samples to be solved.
+        :param storage: predefined np.array to strore data
+        :param lf: the loadflow object to perform the calculations
+        :return: np.array used to store data.
+        '''
         for i in range(samples):
             lf.vomag = flat_Vs
             lf.voang = flat_angles
@@ -100,7 +122,15 @@ def solve_input_data4bus(learn_filename, verification_filename, obj,  learn_outp
     np.save(verification_output_filename, verification_results)
 
 def reformat_data_io(l_input, l_solution, v_input, v_solution, path = None):
-
+    '''
+    Function to reformat the data from [2,50,3] to [50,6] for all inputs.
+    :param l_input: learning input filename
+    :param l_solution: learning solution filename
+    :param v_input: verification input filename
+    :param v_solution: verification solution filename
+    :param path: path to the input data.
+    :return: 4 np. arrays: a set of training data and solutions and a set of verification data and solutions
+    '''
     if path is not None:
         l_input = path + l_input
         l_solution = path + l_solution
@@ -133,16 +163,24 @@ def reformat_data_io(l_input, l_solution, v_input, v_solution, path = None):
 BusList, LineList = build.BuildSystem('/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/4 bus 1 gen.xls') #import from excel
 bus4 = elkLF.decoupled_LF(BusList, LineList) #create LF object
 
-temp_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Dataset_generation/tmp/'
+temp_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/tmp/'
 
 l_filename = 'learn.npy'
 v_filename = 'verify.npy'
 l_output_filename = 'learn_output.npy'
 v_output_filename = 'verify_output.npy'
 
-gen_data_4bus(learning_samples=50, verification_samples=15, learning_file_name=l_filename,
-              verification_file_name=v_filename, path=temp_path)
+start = t.perf_counter()
+
+print(f'starting timestamp: {start}')
+
+gen_data_4bus(learning_samples=15000, verification_samples=3000, learning_file_name=l_filename,
+              verification_file_name=v_filename, path=temp_path, upscaling_factor=1)
+gen_data_time = t.perf_counter()
+
 solve_input_data4bus(l_filename, v_filename, bus4, l_output_filename, v_output_filename, path=temp_path)
+
+solve_input_time = t.perf_counter()
 
 l_i, l_o, v_i, v_o = reformat_data_io(l_filename, l_output_filename, v_filename, v_output_filename, path=temp_path)
 
@@ -150,6 +188,11 @@ np.save('learn_input', l_i)
 np.save('learn_output', l_o)
 np.save('verification_input', v_i)
 np.save('verification_output', v_o)
+
+tot_time = solve_input_time - start
+gen_time = gen_data_time - start
+solve_time = solve_input_time - gen_data_time
+
 
 
 
