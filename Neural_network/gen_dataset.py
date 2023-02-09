@@ -3,6 +3,8 @@
 
 This file is to be used to generate a training dataset for the ML model.
 
+input dataset: PPPQQQ
+output dataset: VVVddd
 '''
 
 import random as r
@@ -194,6 +196,7 @@ gen_time = gen_data_time - start
 solve_time = solve_input_time - gen_data_time
 
 
+print(f'Tot runtime: {tot_time}s')
 
 
 
