@@ -108,12 +108,17 @@ def solve_input_data4bus(learn_filename, verification_filename, obj,  learn_outp
         :param lf: the loadflow object to perform the calculations
         :return: np.array used to store data.
         '''
+
+        def radToDeg(x):
+            return x / np.pi * 180
+
         for i in range(samples):
             lf.vomag = flat_Vs
             lf.voang = flat_angles
             lf.ploads = np.append(learn_input[0][i], 0)
             lf.qloads = np.append(learn_input[1][i], 0)
             lf.solve_NR()
+            lf.voang = radToDeg(lf.voang)
             storage[0][i] = lf.vomag[:3:]
             storage[1][i] = lf.voang[:3:]
         return storage
@@ -176,7 +181,7 @@ start = t.perf_counter()
 
 print(f'starting timestamp: {start}')
 
-gen_data_4bus(learning_samples=15000, verification_samples=3000, learning_file_name=l_filename,
+gen_data_4bus(learning_samples=45000, verification_samples=9000, learning_file_name=l_filename,
               verification_file_name=v_filename, path=temp_path, upscaling_factor=1)
 gen_data_time = t.perf_counter()
 
