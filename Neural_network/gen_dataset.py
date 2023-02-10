@@ -63,7 +63,6 @@ def gen_data_4bus(upscaling_factor=1.1, learning_samples=10000, verification_sam
     np.save(learning_file_name, datalearn)
     np.save(verification_file_name, dataverify)
 
-
 def solve_input_data4bus(learn_filename, verification_filename, obj,  learn_output_filename,
                          verification_output_filename, path = None):
     '''
@@ -165,13 +164,86 @@ def reformat_data_io(l_input, l_solution, v_input, v_solution, path = None):
 
     return learning_inputs, learning_solutions, verification_inputs, verification_solutions
 
+def simple_gen_data_4bus(filename='data', upscaling=1.1, samples = 20000, path=None):
+
+    if path is not None:
+        filename = path + filename
+
+    up = upscaling #for upscaling the crash value to train the network on smaller samples.
+    data = [[], []]
+    P1 = np.random.uniform(low=0, high=0.368*up, size=samples)
+    Q1 = np.random.uniform(low=0, high=0.23*up, size=samples)
+
+    P2 = np.random.uniform(low=0, high=0.736*up, size=samples)
+    Q2 = np.random.uniform(low=0, high=0.368*up, size=samples)
+
+    P3 = np.random.uniform(low=0, high=1.472*up, size=samples)
+    Q3 = np.random.uniform(low=0, high=0.736*up, size=samples)
+
+    inputs = np.array([P1, P2, P3, Q1, Q2, Q3], dtype=float)
+    inputs = np.transpose(inputs)
+    np.save(filename, inputs)
+    return inputs
+
+def simple_solve_data(lf_obj, filename='data', path=None, o_filename= 'o_data'):
+
+    if path is not None:
+        filename = path + filename
+        o_filename = path + o_filename
+
+    input = np.load(filename)
+    samples, input_variables = np.shape(input)
+    output_variables = input_variables
+    output = np.zeros((samples, output_variables), dtype=float)
+
+    def calc_loadflow(nr_samples, data, storage, lf):
+        '''
+        Function to calculate the loadflow of each sample.
+        :param samples: number of samples to be solved.
+        :param storage: predefined np.array to strore data
+        :param lf: the loadflow object to perform the calculations
+        :return: np.array used to store data.
+        '''
+
+        flat_Vs = lf.vomag
+        flat_angles = lf.voang
+
+        def radToDeg(x):
+            return x / np.pi * 180
+
+        for i in range(nr_samples):
+            lf.vomag = flat_Vs
+            lf.voang = flat_angles
+            lf.ploads = np.append(data[i][:3], 0)
+            lf.qloads = np.append(data[i][3:], 0)
+            lf.solve_NR()
+            lf.voang = radToDeg(lf.voang)
+            storage[i][:3] = lf.vomag[:3:]
+            storage[i][3:] = lf.voang[:3:]
+        return storage
+
+    learning_results = calc_loadflow(samples, input, output, lf_obj)
+    np.save(o_filename, learning_results)
+
+    return learning_results
+
+
 
 
 BusList, LineList = build.BuildSystem('/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/4 bus 1 gen.xls') #import from excel
 bus4 = elkLF.decoupled_LF(BusList, LineList) #create LF object
 
 temp_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/tmp/'
+folder = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
 
+start = t.perf_counter()
+
+inputs = simple_gen_data_4bus(filename= 'simple data.npy', upscaling=1, samples=45000, path=folder)
+outputs = simple_solve_data(bus4, filename='simple data.npy', path=folder, o_filename='simple o data.npy')
+
+runtime = t.perf_counter() - start
+
+'''
 l_filename = 'learn.npy'
 v_filename = 'verify.npy'
 l_output_filename = 'learn_output.npy'
@@ -203,6 +275,6 @@ solve_time = solve_input_time - gen_data_time
 
 print(f'Tot runtime: {tot_time}s')
 
-
+'''
 
 

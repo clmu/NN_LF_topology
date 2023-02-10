@@ -20,8 +20,9 @@ else:
 
 (l_i, l_o) = np.load(path + 'learn_input' + small +'.npy')/ norm, np.load(path + 'learn_output' + small + '.npy')
 (v_i, v_o) = np.load(path + 'verification_input' + small + '.npy')/norm, np.load(path + 'verification_output'
-                                                                                 + small + '.npy')
+                                                                         + small + '.npy')
 
+l_data = l_i[36000:]
 #mnist = tf.keras.datasets.mnist
 #(xtrain, ytrain), (xtest, ytest) = mnist.load_data()
 
