@@ -13,13 +13,21 @@ import LF_3bus.build_sys_from_sheet as build
 import numpy as np
 import time as t
 
-def simple_gen_data_4bus(filename='data', upscaling=1.1, samples = 20000, path=None):
+def gen_data_4bus(filename='data', upscaling=1.1, samples = 45000, path=None):
+
+    '''
+    Function generates an input dataset for model training.
+    :param filename: filename for the file containing the generated data.
+    :param upscaling: factor to increase the interval for randomly generated digits.
+    :param samples: number of samples to include in the dataset
+    :param path: path to storage directory.
+    :return: input data. Also  written to file in givewn directory.
+    '''
 
     if path is not None:
         filename = path + filename
 
     up = upscaling #for upscaling the crash value to train the network on smaller samples.
-    data = [[], []]
     P1 = np.random.uniform(low=0, high=0.368*up, size=samples)
     Q1 = np.random.uniform(low=0, high=0.23*up, size=samples)
 
@@ -34,7 +42,18 @@ def simple_gen_data_4bus(filename='data', upscaling=1.1, samples = 20000, path=N
     np.save(filename, inputs)
     return inputs
 
-def simple_solve_data(lf_obj, filename='data', path=None, o_filename= 'o_data'):
+def solve_data(lf_obj, filename='data', path=None, o_filename= 'o_data'):
+
+    '''
+    function to solve the  input data. uses a loadflow object.
+    in each iteration: a flat start is provided, and power demands are altered.
+    :param lf_obj: loadflow object to perform calculations.
+    :param filename: filename for inputs.
+    :param path: filename for storing inputs
+    :param o_filename: filename for outputs.
+    :return: solved variables, avg. runtime of NR solver. results are also written to file
+                format: VVVDDD
+    '''
 
     if path is not None:
         filename = path + filename
@@ -90,43 +109,8 @@ folder = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
 
 start = t.perf_counter()
 
-inputs = simple_gen_data_4bus(filename= 'simple data.npy', upscaling=1, samples=60000, path=folder)
-outputs, avg_runtime_nr = simple_solve_data(bus4, filename='simple data.npy', path=folder, o_filename='simple o data.npy')
+inputs = gen_data_4bus(filename= 'simple data.npy', upscaling=1, samples=60000, path=folder)
+outputs, avg_runtime_nr = solve_data(bus4, filename='simple data.npy', path=folder, o_filename='simple o data.npy')
 
 runtime = t.perf_counter() - start
-
-'''
-l_filename = 'learn.npy'
-v_filename = 'verify.npy'
-l_output_filename = 'learn_output.npy'
-v_output_filename = 'verify_output.npy'
-
-start = t.perf_counter()
-
-print(f'starting timestamp: {start}')
-
-gen_data_4bus(learning_samples=45000, verification_samples=9000, learning_file_name=l_filename,
-              verification_file_name=v_filename, path=temp_path, upscaling_factor=1)
-gen_data_time = t.perf_counter()
-
-solve_input_data4bus(l_filename, v_filename, bus4, l_output_filename, v_output_filename, path=temp_path)
-
-solve_input_time = t.perf_counter()
-
-l_i, l_o, v_i, v_o = reformat_data_io(l_filename, l_output_filename, v_filename, v_output_filename, path=temp_path)
-
-np.save('learn_input', l_i)
-np.save('learn_output', l_o)
-np.save('verification_input', v_i)
-np.save('verification_output', v_o)
-
-tot_time = solve_input_time - start
-gen_time = gen_data_time - start
-solve_time = solve_input_time - gen_data_time
-
-
-print(f'Tot runtime: {tot_time}s')
-
-'''
-
 
