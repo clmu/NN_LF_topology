@@ -8,6 +8,8 @@ from Neural_network.data_evaluation import eval_model_performance as evaluate
 #print('TensorFlow version: ', tf.__version__) #to verify correct installation, seems to be OK.
 
 def verification_predictions(verification_input_data):
+
+
     v_samples, v_variables = np.shape(verification_input_data)
     model_prediction_time = np.zeros((v_samples,))
     model_predictions = np.zeros((v_samples, v_variables))
@@ -22,16 +24,14 @@ def verification_predictions(verification_input_data):
     avg_model_prediction_time = np.average(model_prediction_time)
     return model_predictions, avg_model_prediction_time
 
-path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
+#path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
 
 
 norm_inputs = 2 #value to ensure all inputs are between 0 and 1.
 norm_outputs = 10 #value to make outputs greater to increase performance of meanSquaredError
 
 small_dataset = False
-
 about = 'large_sq_err.ckpt'
-
 if small_dataset:
     small = '_small'
 else:
@@ -66,17 +66,12 @@ model = tf.keras.models.Sequential([
     tf.keras.layers.Dense(6)
 ])
 
-test_format = l_i[:1]
-
-prediction = model(l_i[:1]).numpy() #testing a prediction
-
-#loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-
+'''
+Notes on error function:
+mean square error may be a bad alternatrive since outputs often are smaller than 1. 
+'''
 loss_fn = tf.keras.losses.MeanSquaredError()
-#likely a bad error function since most numbers are below 1: hence the error will always be small.
 #loss_fn = tf.keras.losses.MeanAbsoluteError()
-
-#print(loss_fn(l_o[:1], prediction).numpy())
 
 model.compile(optimizer='adam',
               loss=loss_fn,
@@ -93,13 +88,14 @@ model.fit(l_i, l_o, epochs=150, batch_size=20)
 loss, acc = model.evaluate(v_i, v_o)
 
 print('model accuracy: {:5.2f}%'.format(100*acc))
-'''
+
 
 test_4_bus_1_gen = np.array([[0.02, 0.04, 0.125, 0.007, 0.05, 0.08]])
 
 result_standard_test = model(test_4_bus_1_gen)
 
 array_result_standard_test = np.array(result_standard_test)
+'''
 
 '''
 to evaluate results
