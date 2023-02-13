@@ -1,7 +1,7 @@
 import numpy as np
 
-data = np.asarray([[0, 1, 2, 3], [2.5111, 2.49999, 2.666661, 2.11111]])
+path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
 
-np.savetxt('array.csv', data, delimiter=',')
+input = np.load(path + 'simple data.npy')
 
-imported= np.loadtxt('array.csv', delimiter=',')
+output = np.load(path + 'simple o data.npy')
