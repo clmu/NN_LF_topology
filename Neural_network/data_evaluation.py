@@ -24,6 +24,8 @@ def eval_model_performance(nr_results, model_results, path=None):
     for i in range(samples):
         percentage_error_matrix[i] = (model_results[i] - nr_results[i]) / nr_results[i] * 100
 
+    percentage_error_matrix = np.abs(percentage_error_matrix)
+
     return np.average(percentage_error_matrix, axis=0)
 
 avg_nr_runtime    = 0.00165041
