@@ -15,6 +15,7 @@ class NeuralNetwork:
         self.t_data = None
         self.t_sol = None
         self.norm_input = 2
+        self.tf_model = None
         if structure is None:
             self.structure = architecture
 
@@ -37,6 +38,31 @@ class NeuralNetwork:
         learn_samples = int(nr_samples - v_samples)
         self.l_data, self.l_sol = inputdata[:learn_samples] / self.norm_input, outputdata[:learn_samples]
         self.t_data, self.t_sol = inputdata[learn_samples:] / self.norm_input, outputdata[learn_samples:]
+        pass
+
+    def init_nn_model(self, loss_fn):
+
+        '''
+        Function to initialize neural network using the system architecture in the list self.structure
+        :param loss_fn: the loss function to be used witin the model.
+        :return: none. Stores NN in object. prints a summary of the intialized nn.
+
+        '''
+
+        self.tf_model = tf.keras.models.Sequential()
+        #dense = tf.keras.layers.Dense()
+        for i in range(len(self.structure)):
+            if i == 0:
+                self.tf_model.add(tf.keras.layers.Flatten(input_shape=(self.structure[0],)))
+            elif i == self.structure[-1]:
+                self.tf_model.add(tf.keras.layers.Dense(self.structure[i], activation='linear'))
+
+            self.tf_model.add(tf.keras.layers.Dense(self.structure[i], activation='relu'))
+
+        self.tf_model.compile(optimizer='adam',
+                              loss=loss_fn,
+                              metrics=['accuracy'])
+        self.tf_model.summary()
         pass
 
 
