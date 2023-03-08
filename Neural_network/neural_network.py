@@ -54,7 +54,7 @@ epochs = 150
 cp_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_{epoch:04d}' + about
 cp_dir = os.path.dirname(cp_path)
 
-
+model.summary()
 
 #create callback to save model weights.
 cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=cp_path,
@@ -66,7 +66,7 @@ model.fit(l_i,
           epochs=epochs,
           batch_size=batch_size,
           callbacks=[cp_callback],
-          verbose=0)
+          verbose=1)
 
 '''
 loss, acc = model.evaluate(v_i, v_o)
@@ -103,4 +103,4 @@ evaluating model performance by calculating the average accuracy of each predict
 '''
 
 output_var_percentage_accuracy = evaluate(nr_results_name, model_predict_name, path=results_path)
-overall_mean_accuracy = np.average(np.abs(output_var_percentage_accuracy))
+overall_mean_accuracy = np.average(np.abs(output_var_percentage_accuracy[0]))
