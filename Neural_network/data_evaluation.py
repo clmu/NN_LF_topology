@@ -1,7 +1,7 @@
 import numpy as np
 from Neural_network.nn_functions import verification_predictions, gen_model
 
-def eval_model_performance(nr_results, model_results, path=None):
+def eval_model_performance(nr_results, model_results, path=None, threshold=100):
 
     '''
     function calculates the model performance by calculating the percentage error of each output.
@@ -26,8 +26,9 @@ def eval_model_performance(nr_results, model_results, path=None):
         percentage_error_matrix[i] = (model_results[i] - nr_results[i]) / nr_results[i] * 100
 
     percentage_error_matrix = np.abs(percentage_error_matrix)
-
-    #np.save('percentage_accuracy_matrix.npy', percentage_error_matrix)
+    args_over_threshold = np.argwhere(percentage_error_matrix > threshold)
+    np.save('percentage_accuracy_matrix.npy', percentage_error_matrix)
+    np.save('args_over_threshold.npy', args_over_threshold)
 
     return np.average(percentage_error_matrix, axis=0), np.amax(percentage_error_matrix, axis=0)
 
@@ -99,7 +100,8 @@ def evaluate_checkpoints(actual_solutions, predictions):
     accuracies = []
     worst_accuracies = []
     for prediction in predictions:
-        avg_accuracy, worst_accuracy = eval_model_performance(actual_solutions, prediction)
+        avg_accuracy, worst_accuracy = eval_model_performance(actual_solutions, prediction, threshold=3)
         accuracies.append(avg_accuracy)
         worst_accuracies.append(worst_accuracy)
     return [accuracies, worst_accuracies]
+
