@@ -14,12 +14,6 @@ from Neural_network.nn_functions import verification_predictions, import_data, g
 norm_inputs = 2 #value to ensure all inputs are between 0 and 1.
 norm_outputs = 10 #value to make outputs greater to increase performance of meanSquaredError
 
-small_dataset = False
-about = '.ckpt'
-if small_dataset:
-    small = '_small'
-else:
-    small = ''
 
 '''
 Loading and sorting the data for model training.
@@ -40,7 +34,7 @@ creating, and describing the NN model.
 '''
 
 '''
-Training and evaluating the model. Also savinv the progress.
+Training and evaluating the model. Also saving the progress.
 
 Epoch: number of times the whole training set is worked through
 batch: number of samples worked through before the weights are adjusted. 
@@ -51,7 +45,7 @@ model = gen_model()
 batch_size = 20
 epochs = 150
 
-cp_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_{epoch:04d}' + about
+cp_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_{epoch:04d}'
 cp_dir = os.path.dirname(cp_path)
 
 model.summary()

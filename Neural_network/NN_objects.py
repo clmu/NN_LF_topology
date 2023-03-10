@@ -6,8 +6,8 @@ import numpy as np
 
 architecture = [6, 12, 12, 12, 6]
 class NeuralNetwork:
-    def __init__(self, structure=None, learning_rate=1e-4):
-        self.l_rate = learning_rate
+    def __init__(self, structure=None):
+        self.l_rate = None
         self.epochs = 150
         self.batch_size = 20
         self.l_data = None
@@ -16,6 +16,7 @@ class NeuralNetwork:
         self.t_sol = None
         self.model_sol = None
         self.norm_input = 2
+        self.norm_output = 10
         self.tf_model = None
         self.loss_fn = None
         self.initializer = None
@@ -24,7 +25,7 @@ class NeuralNetwork:
         if structure is None:
             self.structure = architecture
 
-    def init_data(self, name_data_in, name_data_out, ver_frac, datapath=''):
+    def init_data(self, name_data_in, name_data_out, ver_frac, datapath='', scale_data_out=False):
 
         '''
         Function to initialize data
@@ -35,17 +36,20 @@ class NeuralNetwork:
         :return: Pass. Stores data within NN obj.
         '''
 
+        if scale_data_out:
+            o_scale = self.norm_output
+
         inputdata = np.load(datapath + name_data_in)
         outputdata = np.load(datapath + name_data_out)
 
         nr_samples, nr_input_var = np.shape(inputdata)
         v_samples = int(nr_samples // (1/ver_frac))
         learn_samples = int(nr_samples - v_samples)
-        self.l_data, self.l_sol = inputdata[:learn_samples] / self.norm_input, outputdata[:learn_samples]
-        self.t_data, self.t_sol = inputdata[learn_samples:] / self.norm_input, outputdata[learn_samples:]
+        self.l_data, self.l_sol = inputdata[:learn_samples] / self.norm_input, outputdata[:learn_samples]*o_scale
+        self.t_data, self.t_sol = inputdata[learn_samples:] / self.norm_input, outputdata[learn_samples:]*o_scale
         pass
 
-    def init_nn_model(self):
+    def init_nn_model(self, const_l_rate=True):
 
         '''
         Function to initialize neural network using the system architecture in the list self.structure
@@ -62,18 +66,36 @@ class NeuralNetwork:
                 self.tf_model.add(tf.keras.layers.Flatten(input_shape=(self.structure[0],)))
                 #Does this line need to be initialized?
             elif i == self.structure[-1]:
-                self.tf_model.add(tf.keras.layers.Dense(self.structure[i],
-                                                        kernel_initializer=self.initializer))
+                self.tf_model.add(tf.keras.layers.Dense(self.structure[i], kernel_initializer=self.initializer))
             else:
                 self.tf_model.add(tf.keras.layers.Dense(self.structure[i],
-                                                        activation='relu',
-                                                        kernel_initializer=self.initializer))
+                                                        activation='relu', kernel_initializer=self.initializer))
 
-        adam = tf.keras.optimizers.Adam(learning_rate=self.l_rate)
+        if self.l_rate is None:
+            self.set_learning_rate_schedule(const_l_rate=const_l_rate)
+            adam = tf.keras.optimizers.Adam(learning_rate=self.l_rate)
+
         self.tf_model.compile(optimizer=adam,
                               loss=self.loss_fn,
                               metrics=['mean_absolute_percentage_error'])#metrics=['accuracy'])
         self.tf_model.summary()
+        pass
+
+    def set_learning_rate_schedule(self, const_l_rate=False, l_rate=1e-3):
+        if const_l_rate:
+            self.l_rate = l_rate
+        else:
+            initial_l_rate = 0.1
+            final_l_rate = 0.0001
+            decay_factor = (final_l_rate / initial_l_rate) ** (1/self.epochs)
+            steps_epoch = int(len(self.l_data)/self.batch_size)
+            lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
+                initial_learning_rate=initial_l_rate,
+                decay_steps=steps_epoch,
+                decay_rate=decay_factor,
+                staircase=True
+                )
+            self.l_rate=lr_schedule
         pass
 
     def train_model(self, epochs=None, batch_size=None, checkpoints=False, cp_folder_path=None, save_freq=None):
@@ -136,7 +158,7 @@ class NeuralNetwork:
     def model_pred(self):
 
         '''
-        calculate model predicitons for all data in the test data an store them in self.model_sol
+        calculate model predicitons for all data in the test data and store them in self.model_sol
         :return: pass
         '''
 
@@ -165,12 +187,20 @@ class NeuralNetwork:
         pass
 
     def eval_model_performance(self):
-        (nr_results, model_results) = self.t_sol, self.model_sol
-        samples, outputs = np.shape(nr_results)
-        percentage_error_matrix=np.zeros((samples, outputs), dtype=float)
+        '''
+        #(nr_results, model_results) = self.t_sol, self.model_sol
+        #samples, outputs = np.shape(nr_results)
+        samples, outputs = np.shape(self.t_sol)
+        #percentage_error_matrix=np.zeros((samples, outputs), dtype=float)
+        self.abs_percentage_pred_errors=np.zeros((samples, outputs), dtype=float)
         for i in range(samples):
-            percentage_error_matrix[i] = (model_results[i] - nr_results[i]) / nr_results[i] * 100
-        self.abs_percentage_pred_errors = np.abs(percentage_error_matrix)
+            temp = np.divide(np.subtract(self.model_sol[i], self.t_sol[i]), self.t_sol[i]) * 100
+            self.abs_percentage_pred_errors[i] = temp
+            #percentage_error_matrix[i] = (model_results[i] - nr_results[i]) / nr_results[i] * 100
+            #self.abs_percentage_pred_errors[i] = (self.t_sol[i] - self.model_sol[i]) / self.model_sol * 100
+        #self.abs_percentage_pred_errors = np.abs(percentage_error_matrix)
+        '''
+        self.abs_percentage_pred_errors = np.divide(np.subtract(self.model_sol, self.t_sol), self.t_sol)*100
         pass
 
     def eval_worst_model_performance(self):

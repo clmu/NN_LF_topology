@@ -65,6 +65,6 @@ def gen_model():
 
     nn.compile(optimizer='adam',
                   loss=loss_fn,
-                  metrics=['accuracy', 'mean_absolute_percentage_error'])
+                  metrics=['mean_absolute_percentage_error', 'accuracy'])
 
     return nn
