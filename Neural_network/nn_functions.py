@@ -52,19 +52,20 @@ def gen_model():
     Function to generate a neural network. Useful to make sure that all networks have the same architecture.
     :return:
     '''
+    initializer = tf.keras.initializers.GlorotUniform(seed=0)
+    loss_fn = tf.keras.losses.MeanSquaredError()
+
     nn = tf.keras.models.Sequential([
         tf.keras.layers.Flatten(input_shape=(6,)),
         # tf.keras.layers.Dense(6, activation='relu'),
-        tf.keras.layers.Dense(12, activation='relu'),
-        tf.keras.layers.Dense(12, activation='relu'),
-        tf.keras.layers.Dense(12, activation='relu'),
-        tf.keras.layers.Dense(6)
+        tf.keras.layers.Dense(12, activation='relu', kernel_initializer=initializer),
+        tf.keras.layers.Dense(12, activation='relu', kernel_initializer = initializer),
+        tf.keras.layers.Dense(12, activation='relu', kernel_initializer = initializer),
+        tf.keras.layers.Dense(6, kernel_initializer=initializer)
     ])
 
-    loss_fn = tf.keras.losses.MeanSquaredError()
-
     nn.compile(optimizer='adam',
-                  loss=loss_fn,
-                  metrics=['mean_absolute_percentage_error', 'accuracy'])
-
+               loss=loss_fn,
+               metrics=['mean_absolute_percentage_error'])#, 'accuracy'])
+    nn.summary()
     return nn

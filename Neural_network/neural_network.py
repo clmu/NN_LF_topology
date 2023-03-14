@@ -3,8 +3,10 @@ import time
 
 import tensorflow as tf
 import numpy as np
-from Neural_network.data_evaluation import eval_model_performance as evaluate
+
 from Neural_network.nn_functions import verification_predictions, import_data, gen_model
+from Neural_network.data_evaluation import eval_model_performance as evaluate
+from Neural_network.NN_objects import print_weights
 
 #print('TensorFlow version: ', tf.__version__) #to verify correct installation, seems to be OK.
 
@@ -48,7 +50,10 @@ epochs = 150
 cp_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_{epoch:04d}'
 cp_dir = os.path.dirname(cp_path)
 
-model.summary()
+
+
+#print_weights(model)
+
 
 #create callback to save model weights.
 cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=cp_path,

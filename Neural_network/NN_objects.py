@@ -3,11 +3,27 @@ import time
 
 import tensorflow as tf
 import numpy as np
+from tensorflow import keras
+from keras import layers
+layers = tf.keras.layers
 
 architecture = [6, 12, 12, 12, 6]
+
+def print_weights(tf_model):
+
+    '''
+    Function prints all layer weights except the input layer.
+    :param tf_model:
+    :return: prints all layer weights.
+    '''
+
+    for layer in range(len(tf_model.layers)):
+        if layer > 0:
+            print(f'weights:\n\t{tf_model.layers[layer].get_weights()[0]}')
+            print(f'biases:\n\t{tf_model.layers[layer].get_weights()[1]}')
 class NeuralNetwork:
-    def __init__(self, structure=None):
-        self.l_rate = None
+    def __init__(self):
+        self.l_rate = None #set in function init_nn_model
         self.epochs = 150
         self.batch_size = 20
         self.l_data = None
@@ -22,8 +38,7 @@ class NeuralNetwork:
         self.initializer = None
         self.avg_model_pred_time = None
         self.abs_percentage_pred_errors = None
-        if structure is None:
-            self.structure = architecture
+        self.architecture = None
 
     def init_data(self, name_data_in, name_data_out, ver_frac, datapath='', scale_data_out=False):
 
@@ -49,7 +64,7 @@ class NeuralNetwork:
         self.t_data, self.t_sol = inputdata[learn_samples:] / self.norm_input, outputdata[learn_samples:]*o_scale
         pass
 
-    def init_nn_model(self, const_l_rate=True):
+    def init_nn_model(self, architecture=None, const_l_rate=True):
 
         '''
         Function to initialize neural network using the system architecture in the list self.structure
@@ -58,15 +73,21 @@ class NeuralNetwork:
         :return: none. Stores NN in object. prints a summary of the intialized nn.
 
         '''
-
+        if architecture is None:
+            raise Exception('No network architecture provided')
+        self.architecture = architecture
         self.tf_model = tf.keras.models.Sequential()
         #dense = tf.keras.layers.Dense()
         for i in range(len(self.structure)):
             if i == 0:
                 self.tf_model.add(tf.keras.layers.Flatten(input_shape=(self.structure[0],)))
+                '''self.tf_model.add(tf.keras.layers.Dense({inputShape: [self.structure[0]],
+                                                         units: self.structure[0],
+                                                         activation: 'relu'));'''
                 #Does this line need to be initialized?
             elif i == self.structure[-1]:
-                self.tf_model.add(tf.keras.layers.Dense(self.structure[i], kernel_initializer=self.initializer))
+                self.tf_model.add(tf.keras.layers.Dense(self.structure[i], #activation='linear',
+                                                        kernel_initializer=self.initializer))
             else:
                 self.tf_model.add(tf.keras.layers.Dense(self.structure[i],
                                                         activation='relu', kernel_initializer=self.initializer))
@@ -78,6 +99,49 @@ class NeuralNetwork:
         self.tf_model.compile(optimizer=adam,
                               loss=self.loss_fn,
                               metrics=['mean_absolute_percentage_error'])#metrics=['accuracy'])
+        self.tf_model.summary()
+        pass
+
+    def init_nn_model_fixed(self):
+        initializer = self.initializer
+        loss_fn = self.loss_fn
+        self.tf_model = tf.keras.models.Sequential([
+            tf.keras.layers.Flatten(input_shape=(6,)),
+            # tf.keras.layers.Dense(6, activation='relu'),
+            tf.keras.layers.Dense(12, activation='relu', kernel_initializer=initializer),
+            tf.keras.layers.Dense(12, activation='relu', kernel_initializer=initializer),
+            tf.keras.layers.Dense(12, activation='relu', kernel_initializer=initializer),
+            tf.keras.layers.Dense(6, kernel_initializer=initializer)
+        ])
+
+        self.tf_model.compile(optimizer='adam',
+                              loss=loss_fn,
+                              metrics=['mean_absolute_percentage_error'])  # , 'accuracy'])
+        self.tf_model.summary()
+        pass
+
+    def init_nn_model_dynamic(self, architecture=None, const_l_rate=True):
+
+        if architecture is None:
+            raise Exception('No network architecture provided')
+        self.architecture = architecture
+        self.tf_model = tf.keras.models.Sequential()
+        self.tf_model.add(layers.Dense(self.architecture[1], activation='relu', input_shape=(self.architecture[0],)))
+        self.tf_model.summary
+
+        for layer_idx in range(2, len(self.architecture)):
+            neurons = self.architecture[layer_idx]
+            if layer_idx == (len(self.architecture) - 1):
+                self.tf_model.add(layers.Dense(neurons, kernel_initializer=self.initializer))
+            else:
+                self.tf_model.add(layers.Dense(neurons, activation='relu', kernel_initializer=self.initializer))
+
+        if self.l_rate is None:
+            self.set_learning_rate_schedule(const_l_rate=const_l_rate)
+            adam = tf.keras.optimizers.Adam(learning_rate=self.l_rate)
+        self.tf_model.compile(optimizer=adam,
+                              loss = self.loss_fn,
+                              metrics=['mean_absolute_percentage_error'])
         self.tf_model.summary()
         pass
 
@@ -95,7 +159,7 @@ class NeuralNetwork:
                 decay_rate=decay_factor,
                 staircase=True
                 )
-            self.l_rate=lr_schedule
+            self.l_rate = lr_schedule
         pass
 
     def train_model(self, epochs=None, batch_size=None, checkpoints=False, cp_folder_path=None, save_freq=None):
@@ -131,7 +195,7 @@ class NeuralNetwork:
                               epochs=self.epochs,
                               batch_size=self.batch_size,
                               callbacks=[cp_callback],
-                              validation_data=(self.t_data, self.t_sol),
+                              #validation_data=(self.t_data, self.t_sol),
                               verbose=1
                               )
         else:
@@ -139,7 +203,7 @@ class NeuralNetwork:
                               self.l_sol,
                               epochs=self.epochs,
                               batch_size=self.batch_size,
-                              validation_data=(self.t_data, self.t_sol),
+                              #validation_data=(self.t_data, self.t_sol),
                               verbose=1
                               )
         pass
