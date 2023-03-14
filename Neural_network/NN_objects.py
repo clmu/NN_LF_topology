@@ -85,6 +85,14 @@ class NeuralNetwork:
 
     def init_nn_model_dynamic(self, architecture=None, const_l_rate=True):
 
+        '''
+        Function initializes and compiles a tensorflow NN object within the NeuralNetwork object.
+        :param architecture: list containing the amount of neurons in each layer including the input layer.
+                                variable is stored in NeuralNetwork.
+        :param const_l_rate: bool. variable specify wether or not a decaying learning rate should be used.
+        :return:
+        '''
+
         if architecture is None:
             raise Exception('No network architecture provided')
         self.architecture = architecture
@@ -110,11 +118,19 @@ class NeuralNetwork:
         pass
 
     def set_learning_rate_schedule(self, const_l_rate=False, l_rate=1e-3):
+
+        '''
+        Function to set the learning rate for the neural network object.
+        :param const_l_rate: bool to specify if a constant learning rate should be used.
+        :param l_rate: the constant learning rate to be used.
+        :return:
+        '''
+
         if const_l_rate:
             self.l_rate = l_rate
         else:
             initial_l_rate = 0.1
-            final_l_rate = 0.0001
+            final_l_rate = 0.001
             decay_factor = (final_l_rate / initial_l_rate) ** (1/self.epochs)
             steps_epoch = int(len(self.l_data)/self.batch_size)
             lr_schedule = tf.keras.optimizers.schedules.ExponentialDecay(
@@ -234,13 +250,21 @@ class NeuralNetwork:
         pass
 
     def gen_loss_function(self):
+
+        '''
+        Function to generate a custom loss function for tensorflow.
+        :return:
+        '''
+
         pass
 
     def split_data_into_vomag_voang(self):
+
         '''
         Function to split training data into voltage magnitude and angle to train separate networks for
         voltage magnitude and voltage angle predictions.
         :return:
         '''
+
         pass
 
