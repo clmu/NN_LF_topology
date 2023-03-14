@@ -39,6 +39,7 @@ class NeuralNetwork:
         self.avg_model_pred_time = None
         self.abs_percentage_pred_errors = None
         self.architecture = None
+        self.performance_dict = {}
 
     def init_data(self, name_data_in, name_data_out, ver_frac, datapath='', scale_data_out=False):
 
@@ -202,7 +203,7 @@ class NeuralNetwork:
             counter += 1
         self.avg_model_pred_time = np.average(model_prediction_time)
         self.model_sol = model_predictions
-        self.abs_percentage_pred_errors = np.divide(np.subtract(self.model_sol, self.t_sol), self.t_sol) * 100
+        self.abs_percentage_pred_errors = np.abs(np.divide(np.subtract(self.model_sol, self.t_sol), self.t_sol) * 100)
         pass
 
     def load_latest_pretrained_model(self, path):
@@ -211,10 +212,35 @@ class NeuralNetwork:
         latest = tf.train.latest_checkpoint(path)
         self.tf_model.load_weights(latest)
         pass
+    def generate_performance_data_dict(self, threshold=5):
+        '''
+        Function calculates a variety of different performance data for a given threshold value.
+        :return: pass. Data stored within a dictionary.
+        '''
+        def find_affected_sets():
+            affected_predictions = set()
+            for index in self.performance_dict[threshold_key]['worsts']:
+                affected_predictions.add(index[0])
+            return len(affected_predictions)
+
+        threshold_key = str(threshold) + 'percent'
+
+        self.performance_dict[threshold_key] = {}
+        self.performance_dict[threshold_key]['averages'] = np.average(self.abs_percentage_pred_errors, axis=0)
+        self.performance_dict[threshold_key]['average'] = np.average(self.performance_dict[threshold_key]['averages'])
+        self.performance_dict[threshold_key]['worsts'] = np.argwhere(self.abs_percentage_pred_errors > threshold)
+        self.performance_dict[threshold_key]['affected_pred_sets_worst'] = find_affected_sets()
+
+        pass
 
     def gen_loss_function(self):
         pass
-    def eval_worst_model_performance(self):
-        pass
 
+    def split_data_into_vomag_voang(self):
+        '''
+        Function to split training data into voltage magnitude and angle to train separate networks for
+        voltage magnitude and voltage angle predictions.
+        :return:
+        '''
+        pass
 
