@@ -7,6 +7,10 @@ import numpy as np
 from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.NN_objects import print_weights
 
+def loss_acc_for_lineflows(y_true, y_pred):
+    print(y_true)
+    return tf.square(y_true-y_pred)
+
 norm_inputs = 2 #value to ensure all inputs are between 0 and 1.
 norm_outputs = 10 #value to make outputs greater to increase performance of meanSquaredError
 
@@ -25,9 +29,11 @@ nn_obj.init_data('simple data.npy',
                  0.2,
                  datapath=path_to_data,
                  scale_data_out=True)
+nn_obj.load_elk_objects()
 
 
-nn_obj.loss_fn = tf.keras.losses.MeanSquaredError() #alt: MeanSquaredError, MeanAbsolutePercentageError, MeanAbsoluteError
+#nn_obj.loss_fn = tf.keras.losses.MeanSquaredError() #alt: MeanSquaredError, MeanAbsolutePercentageError, MeanAbsoluteError
+nn_obj.loss_fn = loss_acc_for_lineflows
 nn_obj.initializer = tf.keras.initializers.glorot_uniform(seed=0) #THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
 nn_obj.epochs = 10
 nn_obj.init_nn_model_dynamic(architecture=[6, 12, 12, 12, 6], const_l_rate=True)

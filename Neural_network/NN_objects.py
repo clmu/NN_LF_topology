@@ -48,7 +48,7 @@ class NeuralNetwork:
 
     def load_elk_objects(self, path_to_sys_sheet=None):
         '''
-        Function to load two ElkLF objects into their respective containers in a NeuralNetwork object
+        Function to load two ElkLF LoadFlow objects into their respective containers in a NeuralNetwork object
         :return: pass
         '''
         if path_to_sys_sheet is None:
