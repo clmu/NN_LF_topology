@@ -64,44 +64,6 @@ class NeuralNetwork:
         self.t_data, self.t_sol = inputdata[learn_samples:] / self.norm_input, outputdata[learn_samples:]*o_scale
         pass
 
-    def init_nn_model(self, architecture=None, const_l_rate=True):
-
-        '''
-        Function to initialize neural network using the system architecture in the list self.structure
-        :param loss_fn: the loss function to be used witin the model.
-        :param initializer = initializer to be used for weight initialization for each layer
-        :return: none. Stores NN in object. prints a summary of the intialized nn.
-
-        '''
-        if architecture is None:
-            raise Exception('No network architecture provided')
-        self.architecture = architecture
-        self.tf_model = tf.keras.models.Sequential()
-        #dense = tf.keras.layers.Dense()
-        for i in range(len(self.structure)):
-            if i == 0:
-                self.tf_model.add(tf.keras.layers.Flatten(input_shape=(self.structure[0],)))
-                '''self.tf_model.add(tf.keras.layers.Dense({inputShape: [self.structure[0]],
-                                                         units: self.structure[0],
-                                                         activation: 'relu'));'''
-                #Does this line need to be initialized?
-            elif i == self.structure[-1]:
-                self.tf_model.add(tf.keras.layers.Dense(self.structure[i], #activation='linear',
-                                                        kernel_initializer=self.initializer))
-            else:
-                self.tf_model.add(tf.keras.layers.Dense(self.structure[i],
-                                                        activation='relu', kernel_initializer=self.initializer))
-
-        if self.l_rate is None:
-            self.set_learning_rate_schedule(const_l_rate=const_l_rate)
-            adam = tf.keras.optimizers.Adam(learning_rate=self.l_rate)
-
-        self.tf_model.compile(optimizer=adam,
-                              loss=self.loss_fn,
-                              metrics=['mean_absolute_percentage_error'])#metrics=['accuracy'])
-        self.tf_model.summary()
-        pass
-
     def init_nn_model_fixed(self):
         initializer = self.initializer
         loss_fn = self.loss_fn
@@ -138,7 +100,8 @@ class NeuralNetwork:
 
         if self.l_rate is None:
             self.set_learning_rate_schedule(const_l_rate=const_l_rate)
-            adam = tf.keras.optimizers.Adam(learning_rate=self.l_rate)
+
+        adam = tf.keras.optimizers.Adam(learning_rate=self.l_rate)
         self.tf_model.compile(optimizer=adam,
                               loss = self.loss_fn,
                               metrics=['mean_absolute_percentage_error'])
@@ -223,6 +186,7 @@ class NeuralNetwork:
 
         '''
         calculate model predicitons for all data in the test data and store them in self.model_sol
+        Function also calculates percentage deviations from design value.
         :return: pass
         '''
 
@@ -238,6 +202,7 @@ class NeuralNetwork:
             counter += 1
         self.avg_model_pred_time = np.average(model_prediction_time)
         self.model_sol = model_predictions
+        self.abs_percentage_pred_errors = np.divide(np.subtract(self.model_sol, self.t_sol), self.t_sol) * 100
         pass
 
     def load_latest_pretrained_model(self, path):
@@ -249,24 +214,6 @@ class NeuralNetwork:
 
     def gen_loss_function(self):
         pass
-
-    def eval_model_performance(self):
-        '''
-        #(nr_results, model_results) = self.t_sol, self.model_sol
-        #samples, outputs = np.shape(nr_results)
-        samples, outputs = np.shape(self.t_sol)
-        #percentage_error_matrix=np.zeros((samples, outputs), dtype=float)
-        self.abs_percentage_pred_errors=np.zeros((samples, outputs), dtype=float)
-        for i in range(samples):
-            temp = np.divide(np.subtract(self.model_sol[i], self.t_sol[i]), self.t_sol[i]) * 100
-            self.abs_percentage_pred_errors[i] = temp
-            #percentage_error_matrix[i] = (model_results[i] - nr_results[i]) / nr_results[i] * 100
-            #self.abs_percentage_pred_errors[i] = (self.t_sol[i] - self.model_sol[i]) / self.model_sol * 100
-        #self.abs_percentage_pred_errors = np.abs(percentage_error_matrix)
-        '''
-        self.abs_percentage_pred_errors = np.divide(np.subtract(self.model_sol, self.t_sol), self.t_sol)*100
-        pass
-
     def eval_worst_model_performance(self):
         pass
 
