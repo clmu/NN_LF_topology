@@ -392,6 +392,20 @@ class LoadFlow:
         return y_ij * (cartesian_complex(fbus.vomag, fbus.voang)
                        - cartesian_complex(tbus.vomag, tbus.voang))
 
+    def generate_lineflow_matrix(self):
+        dim = len(self.LineList)
+        lineflows = np.zeros((dim, dim), dtype=float)
+        for line in self.LineList:
+            fbus_idx = line.fbus - 1
+            tbus_idx = line.tbus - 1
+            self.cplxflow = self.calc_NR_lineflow(line.fbus, line.tbus)
+            sign = -1
+            if self.cplxflow.real >= 0:
+                sign = 1
+            lineflows[fbus_idx, tbus_idx] = np.abs(self.cplxflow) * sign
+            lineflows[tbus_idx, fbus_idx] = np.abs(self.cplxflow) * sign * -1
+        return
+
 
 class cont_power_flow(LoadFlow):
     #   This is  a subclass of continuation power flow.

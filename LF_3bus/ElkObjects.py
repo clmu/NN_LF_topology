@@ -47,6 +47,7 @@ class Line:
         self.ploss = 0.0
         self.qloss = 0.0
         self.dcflow = None
+        self.cplxflow= None
         self.ptdfs = None
         self.capacity = None
         Line.lineCount += 1
