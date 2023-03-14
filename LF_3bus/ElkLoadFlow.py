@@ -122,6 +122,18 @@ class LoadFlow:
                 line_obj = line
                 return line_obj
 
+    def buslookup(self, busnum):
+
+        '''
+        Function returns the bus with a given busnumber.
+        :param busnum: number of the bus in the system.
+        :return bus object with number busnum.
+        '''
+        for bus in self.BusList:
+            if bus.busnum == busnum:
+                break
+        return bus
+
     def admittance(self, fbus, tbus):
         if fbus != tbus:
             line = self.linelookup(fbus,tbus)
@@ -359,6 +371,26 @@ class LoadFlow:
         self.convergence_time = time_end - time_start
         pass
         #return self.vomag, self.voang
+
+
+    def calc_NR_lineflow(self, fbusnum, tbusnum):
+
+        '''
+        Function calculates the lineflow on a line using the complex voltages from the loadflow solution.
+            NEGLECTING SHUNT ADMITTANCE
+        :param fbus: from bus number
+        :param tbus: to bus number
+        :return:
+        '''
+        def cartesian_complex(vomag, voang):
+            real = vomag * np.cos(voang)
+            imag = vomag * np.sin(voang)
+            return complex(real, imag)
+        line = self.linelookup(fbusnum, tbusnum)
+        fbus, tbus = self.buslookup(fbusnum), self.buslookup(tbusnum)
+        y_ij = 1 / complex(line.r, line.x)
+        return y_ij * (cartesian_complex(fbus.vomag, fbus.voang)
+                       - cartesian_complex(tbus.vomag, tbus.voang))
 
 
 class cont_power_flow(LoadFlow):
