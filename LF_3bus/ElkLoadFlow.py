@@ -40,6 +40,7 @@ class LoadFlow:
         self.ploads, self.qloads = self.initialize_Pload_Qload_vector()
         self.topology = []
         self.mis, self.var = self.establish_mismatch_variable_vector()
+        self.ybus = self.Ybus()
         self.iterations = None
         self.convergence_time = None
 
@@ -50,6 +51,28 @@ class LoadFlow:
         calculated_powers = self.calculate_powers()
         self.mis = old_mis
         return calculated_powers
+
+    def Ybus(self):
+        '''
+        Fetched from repo written in the ELK 14 course.
+        completely unneccesary function, but was the first thing i did.
+        :return: ybus
+        '''
+
+        ybus = np.zeros((len(self.BusList), len(self.BusList)), dtype=complex)
+        for line in self.LineList:
+            '''
+            Gives all the off-diagonal elements in the ybus. The following line is repeated with flipped indices to 
+            create a complete Y_bus matrix.
+            '''
+            ybus[line.fbus - 1, line.tbus - 1] += 1 / line.r + 1 / (line.x * 1j)
+            ybus[line.tbus - 1, line.fbus - 1] += 1 / line.r + 1 / (line.x * 1j)
+
+            # gives alle the diagonal elements
+            ybus[line.fbus - 1, line.fbus - 1] += 1 / line.r + 1 / (line.x * 1j)
+            ybus[line.tbus - 1, line.tbus - 1] += 1 / line.r + 1 / (line.x * 1j)
+
+        return ybus
 
 
     def establish_mismatch_variable_vector(self):
