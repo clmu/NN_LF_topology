@@ -6,10 +6,7 @@ import numpy as np
 
 from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.NN_objects import print_weights
-
-def loss_acc_for_lineflows(y_true, y_pred):
-    print(y_true)
-    return tf.square(y_true-y_pred)
+from Neural_network.custom_loss_function import loss_acc_for_lineflows
 
 norm_inputs = 2 #value to ensure all inputs are between 0 and 1.
 norm_outputs = 10 #value to make outputs greater to increase performance of meanSquaredError
@@ -30,6 +27,7 @@ nn_obj.init_data('simple data.npy',
                  datapath=path_to_data,
                  scale_data_out=True)
 nn_obj.load_elk_objects()
+nn_obj.batch_size = 30
 
 
 #nn_obj.loss_fn = tf.keras.losses.MeanSquaredError() #alt: MeanSquaredError, MeanAbsolutePercentageError, MeanAbsoluteError
