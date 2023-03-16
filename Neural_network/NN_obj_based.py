@@ -6,7 +6,8 @@ import numpy as np
 
 from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.NN_objects import print_weights
-from Neural_network.custom_loss_function import loss_acc_for_lineflows, CustomLoss
+from Neural_network.custom_loss_function import loss_acc_for_lineflows,\
+    CustomLoss, SquaredLineFlowLoss
 
 norm_inputs = 2 #value to ensure all inputs are between 0 and 1.
 norm_outputs = 10 #value to make outputs greater to increase performance of meanSquaredError
@@ -32,11 +33,14 @@ nn_obj.batch_size = 30
 path_to_system_description_file = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/4 bus 1 gen.xls'
 
 custom_loss = CustomLoss()
-custom_loss.init_y_bus_matrix_from_file(path_to_system_description_file)
+custom_loss.init_remaining_values(path=path_to_system_description_file)
+custom_square_loss = SquaredLineFlowLoss()
+custom_square_loss = custom_square_loss.init_remaining_values(path=path_to_system_description_file)
 
-nn_obj.loss_fn = tf.keras.losses.MeanSquaredError() #alt: MeanSquaredError, MeanAbsolutePercentageError, MeanAbsoluteError
+#nn_obj.loss_fn = tf.keras.losses.MeanSquaredError() #alt: MeanSquaredError, MeanAbsolutePercentageError, MeanAbsoluteError
 #nn_obj.loss_fn = loss_acc_for_lineflows
-#nn_obj.loss_fn = custom_loss
+nn_obj.loss_fn = custom_loss
+#nn_obj.loss_fn = SquaredLineFlowLoss
 nn_obj.initializer = tf.keras.initializers.glorot_uniform(seed=0) #THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
 nn_obj.epochs = 10
 nn_obj.init_nn_model_dynamic(architecture=[6, 12, 12, 12, 6], const_l_rate=True)
