@@ -31,6 +31,8 @@ class CustomLoss(tf.keras.losses.Loss):
         self.y_bus_matrix = None
         self.output_normalizer = None
         self.buses_in_sys = None
+        #tf.compat.v1.enable_eager_execution()#trying to force eager execution as some methods require it.
+
 
     def init_remaining_values(self, path='path', output_normalizer=10):
         buslist, linelist = BuildSystem(path)
@@ -49,8 +51,8 @@ class CustomLoss(tf.keras.losses.Loss):
         '''
         line_true = self.calc_abs_mean_flows_for_batch(y_true) * self.output_normalizer
         line_pred = self.calc_abs_mean_flows_for_batch(y_pred) * self.output_normalizer
-        regular_MSE = K.mean(K.square(y_true-y_pred))
-        line_pred_MSE = K.mean(K.square(line_true-line_pred))
+        regular_MSE = tf.cast(K.mean(K.square(y_true-y_pred)), tf.float64)
+        line_pred_MSE = tf.cast(K.mean(K.square(line_true-line_pred)),tf.float64)
         return regular_MSE + line_pred_MSE
 
     def calc_line_flow_matrix(self, tensor):
@@ -68,7 +70,7 @@ class CustomLoss(tf.keras.losses.Loss):
             cplx = vomag * np.sin(voang)
             return complex(real, cplx)
 
-        outputs = tf.shape(tensor).numpy()
+        outputs = tensor.shape[0]#tf.shape(tensor).numpy()
         buses = outputs / 2 #assuming pure load buses only in network.
         tensor = tensor / self.output_normalizer # to calculate actual values, outputs are scaled since they are below 1
         if int(buses) - buses != 0:
@@ -78,8 +80,16 @@ class CustomLoss(tf.keras.losses.Loss):
 
         sys_Vs = np.ones(self.buses_in_sys)
         sys_As = np.zeros(self.buses_in_sys)
+        '''
         sys_Vs[0:self.buses_in_sys-1] = tensor.numpy()[:self.buses_in_sys-1]
         sys_As[0:self.buses_in_sys-1] = tensor.numpy()[self.buses_in_sys-1:]
+        sess = K.get_session()
+        tensor_array = sess.run(tensor)
+        sys_Vs[0:self.buses_in_sys - 1] = tensor_array[:self.buses_in_sys - 1]
+        sys_As[0:self.buses_in_sys-1] = tensor_array[self.buses_in_sys-1:]
+        '''
+        sys_Vs[0:self.buses_in_sys - 1] = tensor.numpy()[:self.buses_in_sys - 1]
+        sys_As[0:self.buses_in_sys - 1] = tensor.numpy()[self.buses_in_sys - 1:]
         cplx_Vs = np.zeros(len(sys_Vs), dtype=complex)
         for bus_idx in range(len(cplx_Vs)):
             cplx_Vs[bus_idx] = gen_complex_voltage(sys_Vs[bus_idx], sys_As[bus_idx])

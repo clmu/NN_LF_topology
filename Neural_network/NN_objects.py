@@ -3,6 +3,9 @@ import time
 
 import tensorflow as tf
 import numpy as np
+import pickle
+import codecs
+import math
 from LF_3bus.build_sys_from_sheet import BuildSystem
 from LF_3bus.ElkLoadFlow import LoadFlow
 from tensorflow import keras
@@ -23,6 +26,34 @@ def print_weights(tf_model):
         if layer > 0:
             print(f'weights:\n\t{tf_model.layers[layer].get_weights()[0]}')
             print(f'biases:\n\t{tf_model.layers[layer].get_weights()[1]}')
+
+def pickle_store_object(obj, path=None, filename=None):
+    '''
+    function to store a (NeuralNetwork) object.
+    :param obj: object to be stored
+    :param path: path to storage container.
+    :param filename: filename without extension of file to be stored.
+    :return: pass.
+    '''
+    f = open(path + filename + '.obj', 'wb')
+    pickle.dump(obj, f)
+    f.close()
+    pass
+
+def pickle_load_obj(path='', filename=''):
+    '''
+    function to load object
+    :param path: path to objec containing folder.
+    :param filename: Filename including extension in folde.
+    :return: object to be loaded.
+    '''
+    #f = codecs.open(path + filename, 'r', encoding='utf8')
+    #file = f.read()
+    #obj = pickle.load(file)
+    f = open(path + filename, 'rb')
+    obj = pickle.load(f)
+    f.close()
+    return obj
 class NeuralNetwork:
     def __init__(self):
         self.l_rate = None #set in function init_nn_model
@@ -130,7 +161,8 @@ class NeuralNetwork:
         adam = tf.keras.optimizers.Adam(learning_rate=self.l_rate)
         self.tf_model.compile(optimizer=adam,
                               loss = self.loss_fn,
-                              metrics=['mean_absolute_percentage_error'])
+                              metrics=['mean_absolute_percentage_error'],
+                              run_eagerly=True)#Note that this line will reduce performance.
         self.tf_model.summary()
         pass
 

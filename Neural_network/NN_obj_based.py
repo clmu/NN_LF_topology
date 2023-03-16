@@ -3,6 +3,8 @@ import time
 
 import tensorflow as tf
 import numpy as np
+import pickle
+import math
 
 from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.NN_objects import print_weights
@@ -65,4 +67,14 @@ nn_obj.model_pred()
 thresholds = [20, 10, 5, 2]
 for threshold in thresholds:
     nn_obj.generate_performance_data_dict(threshold=threshold)
+
+
+'''
+Store NN_OBJ
+'''
+
+filename = 'pinn'
+f = open('/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/NN_objects/' + filename + '.obj', 'wb')
+pickle.dump(nn_obj, f)
+f.close()
 
