@@ -34,8 +34,8 @@ nn_obj.batch_size = 30
 
 path_to_system_description_file = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/4 bus 1 gen.xls'
 
-custom_loss = CustomLoss()
-custom_loss.init_remaining_values(path=path_to_system_description_file)
+custom_loss = CustomLoss(path=path_to_system_description_file, o_norm=nn_obj.norm_output)
+#custom_loss.init_remaining_values(path=path_to_system_description_file)
 custom_square_loss = SquaredLineFlowLoss()
 custom_square_loss = custom_square_loss.init_remaining_values(path=path_to_system_description_file)
 

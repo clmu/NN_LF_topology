@@ -23,16 +23,17 @@ def loss_acc_for_lineflows(y_true, y_pred):
     return tf.square(y_true-y_pred)
 
 class CustomLoss(tf.keras.losses.Loss):
-    def __init__(self):
+    def __init__(self, path='path', o_norm=10):
         '''
         do not change this function as it is used by tensorflow backend...?
         '''
-        super().__init__()
-        self.y_bus_matrix = None
-        self.output_normalizer = None
+        super(CustomLoss, self).__init__()
+        buslist, linelist = BuildSystem(path)
+        lf_obj = LoadFlow(buslist, linelist)
+        self.y_bus_matrix = lf_obj.ybus
+        self.output_normalizer = o_norm
         self.buses_in_sys = None
         #tf.compat.v1.enable_eager_execution()#trying to force eager execution as some methods require it.
-
 
     def init_remaining_values(self, path='path', output_normalizer=10):
         buslist, linelist = BuildSystem(path)
@@ -140,8 +141,13 @@ class CustomLoss(tf.keras.losses.Loss):
 
 class SquaredLineFlowLoss(CustomLoss):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, path='path', o_norm=10):
+        super(CustomLoss).__init__()
+        buslist, linelist = BuildSystem(path)
+        lf_obj = LoadFlow(buslist, linelist)
+        self.y_bus_matrix = lf_obj.ybus
+        self.output_normalizer = o_norm
+        self.buses_in_sys = None
 
     def call(self, y_true, y_pred):
         line_true = self.calc_abs_mean_flows_for_batch(y_true) * self.output_normalizer
