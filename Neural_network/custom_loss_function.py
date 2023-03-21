@@ -184,7 +184,7 @@ class InternalInheritance(CustomLoss):
         return K.square(y_true, y_pred)
 '''
 
-class LineFlowLossForAngle(CustomLoss):
+class LineFlowLossForAngle(SquaredLineFlowLoss):
     '''
     Custom loss class that only imposes line flow based custom loss on angles.
     error added to voltages is 0.
@@ -200,3 +200,12 @@ class LineFlowLossForAngle(CustomLoss):
         correction_vector = np.zeros(tensor.shape, dtype=float)
         correction_vector[self.buses_in_sys - 1:] = abs_mean_flows
         return correction_vector
+
+class CollocationTrainer(CustomLoss):
+
+    def __init__(self, path='no_path_provided', o_norm=10):
+        super().__init__(path, o_norm)
+
+    def call(self, y_true, y_pred):
+        
+        return

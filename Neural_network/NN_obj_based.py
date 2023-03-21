@@ -30,29 +30,34 @@ cp_path_square_loss = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_netwo
 cp_path_angle_loss = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/cp_small_LineFlowLossForAngle/cp_{epoch:04d}'
 
 nn_custom_loss = NN()
+nn_square_loss = NN()
+nn_angle_loss = NN()
+list_of_nn_objs = [nn_custom_loss, nn_square_loss, nn_angle_loss]
+
+architecture = [6, 12, 12, 12, 6]
 
 # loss functions # NB: depend on output normalizer from NN, do not change this later on.
 custom_loss = CustomLoss(path=path_to_system_description_file, o_norm=nn_custom_loss.get_norm_output())
 custom_square_loss = SquaredLineFlowLoss(path=path_to_system_description_file, o_norm=nn_custom_loss.get_norm_output())
 only_angle_loss = LineFlowLossForAngle(path=path_to_system_description_file, o_norm=nn_custom_loss.get_norm_output())
-
-# NN parameters
-nn_custom_loss.epochs = 30
-nn_custom_loss.batch_size = 20
-nn_custom_loss.initializer = tf.keras.initializers.glorot_uniform(seed=0) #THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
-nn_custom_loss.init_data('simple data.npy',
-                 'simple o data.npy',
-                 0.2,
-                 datapath=path_to_data,
-                 scale_data_out=True)
-nn_square_loss = nn_custom_loss
-nn_angle_loss = nn_custom_loss
 nn_custom_loss.loss_fn = custom_loss
 nn_square_loss.loss_fn = custom_square_loss
 nn_angle_loss.loss_fn = only_angle_loss
 
-nn_custom_loss.init_nn_model_dynamic(architecture=[6, 12, 12, 12, 6], const_l_rate=True)
-nn_square_loss.init_nn_model_dynamic(architecture=[6, 12, 12, 12, 6], const_l_rate=True)
+for model in list_of_nn_objs:
+    # NN parameters
+    model.epochs = 30
+    model.batch_size = 20
+    model.initializer = tf.keras.initializers.glorot_uniform(seed=0) #THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
+    model.init_data('simple data.npy',
+                     'simple o data.npy',
+                     0.2,
+                     datapath=path_to_data,
+                     scale_data_out=True)
+
+    model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True)
+    model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True)
+    model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True)
 
 
 nn_custom_loss.train_model(checkpoints=True,
@@ -63,7 +68,7 @@ nn_square_loss.train_model(checkpoints=True,
                            cp_folder_path=cp_path_square_loss,
                            save_freq=120*nn_custom_loss.batch_size)
 
-nn_square_loss.train_model(checkpoints=True,
+nn_angle_loss.train_model(checkpoints=True,
                            cp_folder_path=cp_path_angle_loss,
                            save_freq=120*nn_custom_loss.batch_size)
 
