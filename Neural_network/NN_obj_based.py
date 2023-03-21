@@ -1,3 +1,11 @@
+'''
+
+This is the master script for training and evaluating a neural network from the object oriented approach.
+
+Custom loss functions are found in Neural_network.custom_loss_function
+
+'''
+
 import os
 import time
 
@@ -29,7 +37,7 @@ nn_obj.init_data('simple data.npy',
                  0.2,
                  datapath=path_to_data,
                  scale_data_out=True)
-nn_obj.load_elk_objects()
+#nn_obj.load_elk_objects()
 nn_obj.batch_size = 30
 
 path_to_system_description_file = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/4 bus 1 gen.xls'
@@ -41,8 +49,8 @@ custom_square_loss = SquaredLineFlowLoss(path=path_to_system_description_file, o
 
 #nn_obj.loss_fn = tf.keras.losses.MeanSquaredError() #alt: MeanSquaredError, MeanAbsolutePercentageError, MeanAbsoluteError
 #nn_obj.loss_fn = loss_acc_for_lineflows
-#nn_obj.loss_fn = custom_loss
-nn_obj.loss_fn = custom_square_loss
+nn_obj.loss_fn = custom_loss
+#nn_obj.loss_fn = custom_square_loss
 nn_obj.initializer = tf.keras.initializers.glorot_uniform(seed=0) #THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
 nn_obj.epochs = 10
 nn_obj.init_nn_model_dynamic(architecture=[6, 12, 12, 12, 6], const_l_rate=True)

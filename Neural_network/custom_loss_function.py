@@ -52,10 +52,8 @@ class CustomLoss(tf.keras.losses.Loss):
         '''
         line_true = self.calc_abs_mean_flows_for_batch(y_true) * self.output_normalizer
         line_pred = self.calc_abs_mean_flows_for_batch(y_pred) * self.output_normalizer
-        '''regular_MSE = tf.cast(K.mean(K.square(y_true-y_pred)), tf.float64)
-        line_pred_MSE = tf.cast(K.mean(K.square(line_true-line_pred)), tf.float64)'''
-        regular_MSE = K.square(y_true - y_pred)
-        line_pred_MSE = K.square(line_true - line_pred)
+        regular_MSE = tf.cast(K.mean(K.square(y_true-y_pred)), tf.float64)
+        line_pred_MSE = tf.cast(K.mean(K.square(line_true-line_pred)), tf.float64)
         return regular_MSE + line_pred_MSE
 
     def calc_line_flow_matrix(self, tensor):

@@ -73,21 +73,19 @@ class NeuralNetwork:
         self.abs_percentage_pred_errors = None
         self.architecture = None
         self.performance_dict = {}
-        self.data_obj = None                            # container for ElkLF object for data based calculations
-        self.model_obj = None                           # container for ElkLF object for NN model based calculations
+        #self.data_obj = None                            # container for ElkLF object for data based calculations
+        #self.model_obj = None                           # container for ElkLF object for NN model based calculations
 
-
+    '''
     def load_elk_objects(self, path_to_sys_sheet=None):
-        '''
-        Function to load two ElkLF LoadFlow objects into their respective containers in a NeuralNetwork object
-        :return: pass
-        '''
+        
         if path_to_sys_sheet is None:
             path_to_sys_sheet = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/4 bus 1 gen.xls'
         BusList, LineList = BuildSystem(path_to_sys_sheet)
         self.data_obj = LoadFlow(BusList, LineList)
         self.model_obj = LoadFlow(BusList, LineList)
         pass
+    '''
 
     def init_data(self, name_data_in, name_data_out, ver_frac, datapath='', scale_data_out=False):
 
