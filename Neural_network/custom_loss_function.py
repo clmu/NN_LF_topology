@@ -18,8 +18,8 @@ def loss_acc_for_lineflows(y_true, y_pred):
 
     '''
 
-    print(f'y_true: {y_true}')
-    print(f'y_pred: {y_pred}')
+    #print(f'y_true: {y_true}')
+    #print(f'y_pred: {y_pred}')
     return tf.square(y_true-y_pred)
 
 class CustomLoss(tf.keras.losses.Loss):
@@ -52,8 +52,10 @@ class CustomLoss(tf.keras.losses.Loss):
         '''
         line_true = self.calc_abs_mean_flows_for_batch(y_true) * self.output_normalizer
         line_pred = self.calc_abs_mean_flows_for_batch(y_pred) * self.output_normalizer
-        regular_MSE = tf.cast(K.mean(K.square(y_true-y_pred)), tf.float64)
-        line_pred_MSE = tf.cast(K.mean(K.square(line_true-line_pred)),tf.float64)
+        '''regular_MSE = tf.cast(K.mean(K.square(y_true-y_pred)), tf.float64)
+        line_pred_MSE = tf.cast(K.mean(K.square(line_true-line_pred)), tf.float64)'''
+        regular_MSE = K.square(y_true - y_pred)
+        line_pred_MSE = K.square(line_true - line_pred)
         return regular_MSE + line_pred_MSE
 
     def calc_line_flow_matrix(self, tensor):
@@ -141,16 +143,45 @@ class CustomLoss(tf.keras.losses.Loss):
 
 class SquaredLineFlowLoss(CustomLoss):
 
-    def __init__(self, path='path', o_norm=10):
+    '''def __init__(self, path='path', o_norm=10):
         super(CustomLoss).__init__()
         buslist, linelist = BuildSystem(path)
         lf_obj = LoadFlow(buslist, linelist)
         self.y_bus_matrix = lf_obj.ybus
         self.output_normalizer = o_norm
         self.buses_in_sys = None
+        #required by backend:
+        self.reduction = 'auto'
+        self.name = None
+        #"protected" attributes
+        self._name_scope = 'SquaredLineFlowLoss'
+        self._allow_sum_over_batch_size = False'''
+    def __init__(self, path='no_path_provided', o_norm=10):
+        super().__init__(path, o_norm)
 
     def call(self, y_true, y_pred):
         line_true = self.calc_abs_mean_flows_for_batch(y_true) * self.output_normalizer
         line_pred = self.calc_abs_mean_flows_for_batch(y_pred) * self.output_normalizer
+        '''
+        regular_sq_loss = tf.cast(K.square(y_true-y_pred), tf.float64)
+        line_sq_loss = tf.cast(K.square(line_true-line_pred), tf.float64)
+        regular_sq_loss = K.square(y_true-y_pred)
+        line_sq_loss = K.square(line_true-line_pred)
+        thesum = tf.cast(tf.add(regular_sq_loss, line_sq_loss), tf.float64)
+        print(thesum)
+        '''
+        pure_output_element = tf.cast(K.square(y_true-y_pred), tf.float64)
+        line_flow_element = tf.cast(K.square(line_true - line_pred), tf.float64)
+        return pure_output_element + line_flow_element
 
-        return K.square(y_true-y_pred) + K.square(line_true - line_pred)
+
+'''
+class InternalInheritance(CustomLoss):
+    # initialize instance attributes
+    def __init__(self, path='path', o_norm=10):
+        super().__init__(path, o_norm)
+
+    # Compute loss
+    def call(self, y_true, y_pred):
+        return K.square(y_true, y_pred)
+'''
