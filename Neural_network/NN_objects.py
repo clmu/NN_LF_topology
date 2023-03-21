@@ -64,8 +64,6 @@ class NeuralNetwork:
         self.t_data = None
         self.t_sol = None
         self.model_sol = None
-        self.norm_input = 2
-        self.norm_output = 10
         self.tf_model = None
         self.loss_fn = None
         self.initializer = None
@@ -73,9 +71,10 @@ class NeuralNetwork:
         self.abs_percentage_pred_errors = None
         self.architecture = None
         self.performance_dict = {}
-        #self.data_obj = None                            # container for ElkLF object for data based calculations
-        #self.model_obj = None                           # container for ElkLF object for NN model based calculations
-
+        #self.norm_input = 2
+        #self.norm_output = 10
+        self._norm_input = 2
+        self._norm_output = 10
     '''
     def load_elk_objects(self, path_to_sys_sheet=None):
         
@@ -86,6 +85,19 @@ class NeuralNetwork:
         self.model_obj = LoadFlow(BusList, LineList)
         pass
     '''
+    def set_norm_input(self, integer):
+        self._norm_input = integer
+        pass
+
+    def set_norm_output(self, integer):
+        self._norm_output = integer
+        pass
+
+    def get_norm_input(self):
+        return self._norm_input
+
+    def get_norm_output(self):
+        return self._norm_output
 
     def init_data(self, name_data_in, name_data_out, ver_frac, datapath='', scale_data_out=False):
 
@@ -99,7 +111,7 @@ class NeuralNetwork:
         '''
 
         if scale_data_out:
-            o_scale = self.norm_output
+            o_scale = self._norm_output
 
         inputdata = np.load(datapath + name_data_in)
         outputdata = np.load(datapath + name_data_out)
@@ -107,8 +119,8 @@ class NeuralNetwork:
         nr_samples, nr_input_var = np.shape(inputdata)
         v_samples = int(nr_samples // (1/ver_frac))
         learn_samples = int(nr_samples - v_samples)
-        self.l_data, self.l_sol = inputdata[:learn_samples] / self.norm_input, outputdata[:learn_samples]*o_scale
-        self.t_data, self.t_sol = inputdata[learn_samples:] / self.norm_input, outputdata[learn_samples:]*o_scale
+        self.l_data, self.l_sol = inputdata[:learn_samples] / self._norm_input, outputdata[:learn_samples]*o_scale
+        self.t_data, self.t_sol = inputdata[learn_samples:] / self._norm_input, outputdata[learn_samples:]*o_scale
         pass
 
     def init_nn_model_fixed(self):
