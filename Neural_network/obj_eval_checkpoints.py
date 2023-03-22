@@ -1,24 +1,37 @@
 import tensorflow as tf
 import numpy as np
+import time as t
 
 from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.NN_objects import pickle_store_object as store
-from Neural_network.data_evaluation import evaluate_cps_obj
-
-
+from Neural_network.data_evaluation import evaluate_cps_obj, evaluate_cps_obj_new
 
 
 path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
-#cp_path_custom_loss = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/cp_small_SquaredLineFlowLoss/'
-cp_folder = 'cp_small_SquaredLineFlowLoss/'
+network = 'small'
+#err_fn = 'SquaredLineFlowLoss'
+#err_fn = 'CustomLoss'
+#err_fn = 'LineFlowLossForAngle'
+err_fn = 'MSE'
+#cp_folder = 'cp_small_SquaredLineFlowLoss/'
+cp_folder = 'cp_' + network + '_' + err_fn + '/'
 architecture = [6, 12, 12, 12, 6]
 thresholds = [20, 10, 5, 3]
 
-perf_dicts = evaluate_cps_obj(30, path_to_data=path_to_data,
+start_eval = t.perf_counter()
+print('starting_eval')
+
+perf_dicts = evaluate_cps_obj_new(30, path_to_data=path_to_data,
                               cp_folder=cp_folder,
                               architecture=architecture,
                               thresholds=thresholds)
+dict_list_calc_time = t.perf_counter()-start_eval
 
+print('storing')
+
+store(perf_dicts, path=path_to_data+cp_folder, filename='perf_dict_' + err_fn)
+
+print('performance dict generated and stored')
 
 '''
 def gen_filename_ext(number):
