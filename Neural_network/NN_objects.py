@@ -70,6 +70,7 @@ class NeuralNetwork:
         self.avg_model_pred_time = None
         self.abs_percentage_pred_errors = None
         self.architecture = None
+        self.load_buses = None
         self.performance_dict = {}
         #self.norm_input = 2
         #self.norm_output = 10
@@ -99,7 +100,7 @@ class NeuralNetwork:
     def get_norm_output(self):
         return self._norm_output
 
-    def init_data(self, name_data_in, name_data_out, ver_frac, datapath='', scale_data_out=False):
+    def init_data(self, name_data_in, name_data_out, ver_frac=None, datapath='', scale_data_out=False):
 
         '''
         Function to initialize data
@@ -173,6 +174,9 @@ class NeuralNetwork:
                               loss = self.loss_fn,
                               metrics=['mean_absolute_percentage_error'],
                               run_eagerly=True)#Note that this line will reduce performance.
+        if self.architecture[-1] % 2 != 0:
+            raise Exception('The system does not have equal amounts of active and reactive powers')
+        self.load_buses = int(self.architecture[-1] / 2)
         if print_summary:
             self.tf_model.summary()
         pass
@@ -288,11 +292,10 @@ class NeuralNetwork:
         latest = tf.train.latest_checkpoint(path)
         self.tf_model.load_weights(latest)
         pass
+
+    '''
     def generate_performance_data_dict(self, threshold=5):
-        '''
-        Function calculates a variety of different performance data for a given threshold value.
-        :return: pass. Data stored within a dictionary.
-        '''
+        
         def find_affected_sets():
             affected_predictions = set()
             for index in self.performance_dict[threshold_key]['worsts']:
@@ -306,6 +309,37 @@ class NeuralNetwork:
         self.performance_dict[threshold_key]['average'] = np.average(self.performance_dict[threshold_key]['averages'])
         self.performance_dict[threshold_key]['worsts'] = np.argwhere(self.abs_percentage_pred_errors > threshold)
         self.performance_dict[threshold_key]['affected_pred_sets_worst'] = find_affected_sets()
+
+        pass'''
+
+    def generate_performance_data_dict_improved(self, threshold=[5]):
+        '''
+        Function calculates a variety of different performance data for a given threshold value.
+        :param threshold: list of thresholds for model performance evaluation
+        :return: pass. Data stored within a dictionary.
+        '''
+        def find_affected_sets(threshold_percentage):
+            affected_predictions = set()
+            for index in self.performance_dict[threshold_percentage]['pred_errors_over_threshold']:
+                affected_predictions.add(index[0])
+            return len(affected_predictions)
+
+        #threshold_independent_metrics
+
+        self.performance_dict['averages'] = np.average(self.abs_percentage_pred_errors, axis=0)
+        self.performance_dict['overall_average'] = np.average(self.performance_dict['averages'])
+        self.performance_dict['average_angle'] = np.average(self.performance_dict['averages'][self.load_buses:])
+        self.performance_dict['average_voltage'] = np.average(self.performance_dict['averages'][:self.load_buses])
+
+        #threshold_dependent_metrics
+        for threshold_number in threshold:
+            threshold_key = str(threshold_number) + 'percent'
+            self.performance_dict[threshold_key] = {}
+            self.performance_dict[threshold_key]['pred_errors_over_threshold'] = np.argwhere(
+                                                            self.abs_percentage_pred_errors > threshold_number)
+            affected_sets = find_affected_sets(threshold_key)
+            self.performance_dict[threshold_key]['sets_with_pred_error_over_threshold'] = affected_sets
+            self.performance_dict[threshold_key]['sets_worse_than_threshold'] = affected_sets / self.t_sol.shape[0] * 100
 
         pass
 
