@@ -24,15 +24,17 @@ from Neural_network.custom_loss_function import loss_acc_for_lineflows,\
 
 # PATHS to containers
 path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
+path_to_nn_folder = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
 path_to_system_description_file = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/4 bus 1 gen.xls'
-cp_path_custom_loss = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/cp_small_CustomLoss/cp_{epoch:04d}'
-cp_path_square_loss = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/cp_small_SquaredLineFlowLoss/cp_{epoch:04d}'
-cp_path_angle_loss = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/cp_small_LineFlowLossForAngle/cp_{epoch:04d}'
-
+cp_path_MSE = 'cp_small_MSE/cp_{epoch:04d}'
+cp_path_custom_loss = path_to_nn_folder + 'cp_small_CustomLoss/cp_{epoch:04d}'
+cp_path_square_loss = path_to_nn_folder + 'cp_small_SquaredLineFlowLoss/cp_{epoch:04d}'
+cp_path_angle_loss = path_to_nn_folder + 'cp_small_LineFlowLossForAngle/cp_{epoch:04d}'
+nn_regular_mse = NN()
 nn_custom_loss = NN()
 nn_square_loss = NN()
 nn_angle_loss = NN()
-list_of_nn_objs = [nn_custom_loss, nn_square_loss, nn_angle_loss]
+list_of_nn_objs = [nn_regular_mse, nn_custom_loss, nn_square_loss, nn_angle_loss]
 
 architecture = [6, 12, 12, 12, 6]
 
@@ -40,13 +42,15 @@ architecture = [6, 12, 12, 12, 6]
 custom_loss = CustomLoss(path=path_to_system_description_file, o_norm=nn_custom_loss.get_norm_output())
 custom_square_loss = SquaredLineFlowLoss(path=path_to_system_description_file, o_norm=nn_custom_loss.get_norm_output())
 only_angle_loss = LineFlowLossForAngle(path=path_to_system_description_file, o_norm=nn_custom_loss.get_norm_output())
+
+nn_regular_mse.loss_fn = tf.keras.losses.MSE
 nn_custom_loss.loss_fn = custom_loss
 nn_square_loss.loss_fn = custom_square_loss
 nn_angle_loss.loss_fn = only_angle_loss
 
 for model in list_of_nn_objs:
     # NN parameters
-    model.epochs = 30
+    model.epochs = 150
     model.batch_size = 20
     model.initializer = tf.keras.initializers.glorot_uniform(seed=0) #THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
     model.init_data('simple data.npy',
@@ -60,6 +64,11 @@ for model in list_of_nn_objs:
     model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True)
 
 
+nn_regular_mse.train_model(checkpoints=True,
+                           cp_folder_path=cp_path_MSE,
+                           save_freq=120*nn_custom_loss.batch_size)
+
+'''
 nn_custom_loss.train_model(checkpoints=True,
                            cp_folder_path=cp_path_custom_loss,
                            save_freq=120*nn_custom_loss.batch_size)
@@ -71,6 +80,7 @@ nn_square_loss.train_model(checkpoints=True,
 nn_angle_loss.train_model(checkpoints=True,
                            cp_folder_path=cp_path_angle_loss,
                            save_freq=120*nn_custom_loss.batch_size)
+'''
 
 '''
 Data eval
