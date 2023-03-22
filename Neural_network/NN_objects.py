@@ -141,7 +141,7 @@ class NeuralNetwork:
         self.tf_model.summary()
         pass
 
-    def init_nn_model_dynamic(self, architecture=None, const_l_rate=True):
+    def init_nn_model_dynamic(self, architecture=None, const_l_rate=True, print_summary=False):
 
         '''
         Function initializes and compiles a tensorflow NN object within the NeuralNetwork object.
@@ -173,7 +173,8 @@ class NeuralNetwork:
                               loss = self.loss_fn,
                               metrics=['mean_absolute_percentage_error'],
                               run_eagerly=True)#Note that this line will reduce performance.
-        self.tf_model.summary()
+        if print_summary:
+            self.tf_model.summary()
         pass
 
     def set_learning_rate_schedule(self, const_l_rate=False, l_rate=1e-3):
