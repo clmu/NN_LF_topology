@@ -3,17 +3,30 @@ import numpy as np
 
 from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.NN_objects import pickle_store_object as store
+from Neural_network.data_evaluation import evaluate_cps_obj
+
+
+
+
+path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
+#cp_path_custom_loss = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/cp_small_SquaredLineFlowLoss/'
+cp_folder = 'cp_small_SquaredLineFlowLoss/'
+architecture = [6, 12, 12, 12, 6]
+thresholds = [20, 10, 5, 3]
+
+perf_dicts = evaluate_cps_obj(30, path_to_data=path_to_data,
+                              cp_folder=cp_folder,
+                              architecture=architecture,
+                              thresholds=thresholds)
+
+
+'''
 def gen_filename_ext(number):
     number = str(number)
     while len(number) < 4:
         number = '0' + number
     number = 'cp_' + number# + '.index'
     return number
-
-
-path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
-cp_path_custom_loss = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/cp_small_SquaredLineFlowLoss/'
-architecture = [6, 12, 12, 12, 6]
 
 model_numbers = np.arange(1, 30+1)
 file_exts = []
@@ -46,7 +59,7 @@ for index in range(len(models)):
     avg_perc_dev[index] = models[index].performance_dict['3percent']['average']
 
 store(performance_dicts, path=cp_path_custom_loss, filename='performance_dicts')
-
+'''
 
 
 

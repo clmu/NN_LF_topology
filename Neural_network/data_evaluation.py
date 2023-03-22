@@ -1,5 +1,7 @@
 import numpy as np
+import tensorflow as tf
 from Neural_network.nn_functions import verification_predictions, gen_model
+from Neural_network.NN_objects import NeuralNetwork as NN
 
 def eval_model_performance(nr_results, model_results, path=None, threshold=100):
 
@@ -104,4 +106,56 @@ def evaluate_checkpoints(actual_solutions, predictions):
         accuracies.append(avg_accuracy)
         worst_accuracies.append(worst_accuracy)
     return [accuracies, worst_accuracies]
+
+
+def evaluate_cps_obj(cps, path_to_data='nopath', cp_folder='nofolder', architecture=None, thresholds=None):
+
+    '''
+    Function creates a performance dictionary for a given number of cps, using the provided thresholds.
+    :param cps: number of checkpoints. Could be changed to a list of numbers of all cps to be evaluated later.
+    :param path_to_data: path to model training data.
+    :param cp_folder: Path to checkpoint folder. It is assumed that this is a subfolder of path_to_data
+    :param architecture: NN architecture. Used to generate a NN obj to load data into.
+    :param thresholds: list of integers. represent percentages for data evaluation.
+    :return: List of performance dictionaries
+    '''
+    def gen_filename_ext(number):
+        number = str(number)
+        while len(number) < 4:
+            number = '0' + number
+        number = 'cp_' + number  # + '.index'
+        return number
+
+    cp_path = path_to_data + cp_folder
+    model_numbers = np.arange(1, cps + 1)
+    file_exts = []
+    models = []
+    for model_number in model_numbers:
+        models.append(NN())
+        file_exts.append(gen_filename_ext(model_number))
+
+    for model in models:
+        model.epochs = 30
+        model.batch_size = 20
+        model.initializer = tf.keras.initializers.glorot_uniform(seed=0)
+        model.init_data('simple data.npy',
+                        'simple o data.npy',
+                        0.2,
+                        datapath=path_to_data,
+                        scale_data_out=True)
+        model.loss_fn = tf.keras.losses.MSE
+        model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True)
+
+    #thresholds = [20, 10, 5, 3]
+    avg_perc_dev = np.zeros(len(models), dtype=float)
+    performance_dicts = []
+    for index in range(len(models)):
+        models[index].tf_model.load_weights(cp_path + file_exts[index])
+        models[index].model_pred()
+        for threshold in thresholds:
+            models[index].generate_performance_data_dict(threshold)
+        performance_dicts.append(models[index].performance_dict)
+        avg_perc_dev[index] = models[index].performance_dict['3percent']['average']
+
+    return performance_dicts
 
