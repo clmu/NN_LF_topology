@@ -3,11 +3,16 @@ import tensorflow as tf
 from Neural_network.custom_loss_function import CustomLoss, loss_acc_for_lineflows, SquaredLineFlowLoss
 from Neural_network.NN_objects import NeuralNetwork
 
+
+@tf.function
+def gen_non_eager_tensor(nparray):
+    return nparray #tf.constant(nparray)
+
 nn = NeuralNetwork()
 
 path_sys_file = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/4 bus 1 gen.xls'
-loss = CustomLoss(path=path_sys_file, o_norm=nn.norm_output)
-sqloss = SquaredLineFlowLoss(path=path_sys_file, o_norm=nn.norm_output)
+loss = CustomLoss(path=path_sys_file, o_norm=nn.get_norm_output())
+sqloss = SquaredLineFlowLoss(path=path_sys_file, o_norm=nn.get_norm_output())
 
 path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
 nn.init_data('simple data.npy',
@@ -17,8 +22,10 @@ nn.init_data('simple data.npy',
                  scale_data_out=True)
 huber = tf.keras.losses.huber
 tf_poisson = tf.keras.losses.Loss
-
+eager_tensor = tf.constant(4)
+#shape_eager = eager_tensor.shape[0]
 tensor = tf.constant(nn.t_sol[:20])
+non_eager = gen_non_eager_tensor(nn.t_sol[:20])
 tensor_data_pred_fake = tf.constant(nn.t_sol[20:40])
 #lineflows = loss.calc_line_flow_matrix(tensor[0])
 #lineflows = np.abs(lineflows)
