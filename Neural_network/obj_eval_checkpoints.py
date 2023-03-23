@@ -4,34 +4,34 @@ import time as t
 
 from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.NN_objects import pickle_store_object as store
-from Neural_network.data_evaluation import evaluate_cps_obj, evaluate_cps_obj_new
+from Neural_network.data_evaluation import evaluate_cps_obj_new
 
 
 path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
 network = 'small'
-#err_fn = 'SquaredLineFlowLoss'
-#err_fn = 'CustomLoss'
-#err_fn = 'LineFlowLossForAngle'
-err_fn = 'MSE'
+sq = 'SquaredLineFlowLoss'
+cl = 'CustomLoss'
+la = 'LineFlowLossForAngle'
+mse = 'MSE_short'
 #cp_folder = 'cp_small_SquaredLineFlowLoss/'
-cp_folder = 'cp_' + network + '_' + err_fn + '/'
+
 architecture = [6, 12, 12, 12, 6]
 thresholds = [20, 10, 5, 3]
+for err_fn in [sq, cl, la, mse]:
+    cp_folder = 'cp_' + network + '_' + err_fn + '/'
+    start_eval = t.perf_counter()
+    print(f'starting_eval of {err_fn}')
+    perf_dicts = evaluate_cps_obj_new(30, path_to_data=path_to_data,
+                                  cp_folder=cp_folder,
+                                  architecture=architecture,
+                                  thresholds=thresholds)
+    dict_list_calc_time = t.perf_counter()-start_eval
+    print(f'finished eval of {err_fn} in {dict_list_calc_time} seconds')
+    print(f'storing eval of {err_fn}')
 
-start_eval = t.perf_counter()
-print('starting_eval')
+    store(perf_dicts, path=path_to_data+cp_folder, filename='perf_dict')
 
-perf_dicts = evaluate_cps_obj_new(30, path_to_data=path_to_data,
-                              cp_folder=cp_folder,
-                              architecture=architecture,
-                              thresholds=thresholds)
-dict_list_calc_time = t.perf_counter()-start_eval
-
-print('storing')
-
-store(perf_dicts, path=path_to_data+cp_folder, filename='perf_dict_' + err_fn)
-
-print('performance dict generated and stored')
+print('performance dicts generated and stored')
 
 '''
 def gen_filename_ext(number):
