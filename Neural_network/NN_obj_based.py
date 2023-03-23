@@ -9,7 +9,7 @@ Custom loss functions are found in Neural_network.custom_loss_function. if other
 
 import os
 import time
-
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' #TO SILCENCE INITIAL WARNINGS.
 import tensorflow as tf
 import numpy as np
 import pickle
@@ -50,7 +50,7 @@ nn_angle_loss.loss_fn = only_angle_loss
 
 for model in list_of_nn_objs:
     # NN parameters
-    model.epochs = 150
+    model.epochs = 2
     model.batch_size = 20
     model.initializer = tf.keras.initializers.glorot_uniform(seed=0) #THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
     model.init_data('simple data.npy',
@@ -58,20 +58,19 @@ for model in list_of_nn_objs:
                      0.2,
                      datapath=path_to_data,
                      scale_data_out=True)
-
-    model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True)
-    model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True)
-    model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True)
+    model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True, custom_loss=False)
 
 
-nn_regular_mse.train_model(checkpoints=True,
+nn_regular_mse.train_model(checkpoints=False,
                            cp_folder_path=cp_path_MSE,
                            save_freq=120*nn_custom_loss.batch_size)
 
-'''
-nn_custom_loss.train_model(checkpoints=True,
+
+nn_custom_loss.train_model(checkpoints=False,
                            cp_folder_path=cp_path_custom_loss,
                            save_freq=120*nn_custom_loss.batch_size)
+
+'''
 
 nn_square_loss.train_model(checkpoints=True,
                            cp_folder_path=cp_path_square_loss,

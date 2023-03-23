@@ -10,6 +10,7 @@ from LF_3bus.build_sys_from_sheet import BuildSystem
 from LF_3bus.ElkLoadFlow import LoadFlow
 from tensorflow import keras
 from keras import layers
+from Neural_network.Custom_model import CustomModel
 layers = tf.keras.layers
 
 architecture = [6, 12, 12, 12, 6]
@@ -142,7 +143,7 @@ class NeuralNetwork:
         self.tf_model.summary()
         pass
 
-    def init_nn_model_dynamic(self, architecture=None, const_l_rate=True, print_summary=False):
+    def init_nn_model_dynamic(self, architecture=None, const_l_rate=True, print_summary=False, custom_loss=False):
 
         '''
         Function initializes and compiles a tensorflow NN object within the NeuralNetwork object.
@@ -156,13 +157,14 @@ class NeuralNetwork:
             raise Exception('No network architecture provided')
         self.architecture = architecture
         self.tf_model = tf.keras.models.Sequential()
+        #self.tf_model = CustomModel() #for more detailed access to control etc.
         self.tf_model.add(layers.Dense(self.architecture[1], activation='relu', input_shape=(self.architecture[0],)))
         self.tf_model.summary
 
         for layer_idx in range(2, len(self.architecture)):
             neurons = self.architecture[layer_idx]
             if layer_idx == (len(self.architecture) - 1):
-                self.tf_model.add(layers.Dense(neurons, kernel_initializer=self.initializer))
+                self.tf_model.add(layers.Dense(neurons, kernel_initializer=self.initializer, name='output'))
             else:
                 self.tf_model.add(layers.Dense(neurons, activation='relu', kernel_initializer=self.initializer))
 
@@ -171,9 +173,10 @@ class NeuralNetwork:
 
         adam = tf.keras.optimizers.Adam(learning_rate=self.l_rate)
         self.tf_model.compile(optimizer=adam,
-                              loss = self.loss_fn,
-                              metrics=['mean_absolute_percentage_error'],
-                              run_eagerly=True)#Note that this line will reduce performance.
+                              loss=self.loss_fn,
+                              metrics=['mean_absolute_percentage_error'], run_eagerly=custom_loss)
+                                                                        # Run eagerly reduces performance.
+
         if self.architecture[-1] % 2 != 0:
             raise Exception('The system does not have equal amounts of active and reactive powers')
         self.load_buses = int(self.architecture[-1] / 2)

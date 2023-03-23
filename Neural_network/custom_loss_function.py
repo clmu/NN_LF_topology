@@ -46,8 +46,8 @@ class CustomLoss(tf.keras.losses.Loss):
         '''
         do not change inputs of this function as it is used by the tensorflow backend....?
         Function returns the sum of line true prediction errors and
-        :param y_true: correct outputs
-        :param y_pred: model predicted outputs.
+        :param y_true: correct outputs [tensor]
+        :param y_pred: model predicted outputs [tensor]
         :return: the loss value returned to tensorflow.
         '''
         line_true = self.calc_abs_mean_flows_for_batch(y_true) * self.output_normalizer
@@ -94,7 +94,15 @@ class CustomLoss(tf.keras.losses.Loss):
         cplx_Vs = np.zeros(len(sys_Vs), dtype=complex)
         for bus_idx in range(len(cplx_Vs)):
             cplx_Vs[bus_idx] = gen_complex_voltage(sys_Vs[bus_idx], sys_As[bus_idx])
-
+        '''
+        test_tensor = tensor
+        v_tensor = tensor[:self.buses_in_sys - 1]  # tf.slice(tensor, 0, self.buses_in_sys - 1)
+        a_tensor = tensor[self.buses_in_sys - 1:]  # tf.slice(tensor, self.buses_in_sys - 1, tensor.shape)
+        dim = v_tensor.shape.dims[0]
+        cplx_vs_short = np.zeros(dim, dtype=complex)
+        for i in range(dim):
+            cplx_vs_short[i] = gen_complex_voltage(v_tensor[i], a_tensor[i])
+        '''
         line_flows = np.zeros((self.buses_in_sys, self.buses_in_sys), dtype=complex)
         for r in range(self.buses_in_sys):
             for c in range(self.buses_in_sys):
