@@ -49,6 +49,7 @@ class DistLoadFlow3:
         self.backup_feeders = []
         self.alteredTopology = False
         self.latest_load_flow_solution_time = None
+        #self.initialize(1)
     def config3(self):
         """Function for making the topology - it sets up the connection between two buses by assigned the line to the to bus
         and by preparing a list of from bus connections (branching)
@@ -572,7 +573,18 @@ class DistLoadFlow3:
             self.tableplot(mainlist, title, colind, rowno, columncol=[], rowcol=[])
 
     # Conduct a distribution system load flow based on FBS
+
+
+    def copy_voltages_to_dlf_obj(self):
+        for bus_idx in range(len(self.BusList)):
+            self.voang[bus_idx] = self.BusList[bus_idx].voang
+            self.vomag[bus_idx] = self.BusList[bus_idx].vomag
+
+        pass
+
+
     def DistLF(self, epsilon=0.0001, print_solution=False):
+
         """ Solves the distribution load flow until the convergence criteria is met for all buses.
         The two first steps are to set up additions topology information and to build the main structure
         Next,it is switched between forward sweeps(Voltage updates) and backward sweeps(load update and loss calcuation)
@@ -621,6 +633,7 @@ class DistLoadFlow3:
 #        if len(overload) > 0:
 #            self.handleOverload(overload)
         self.latest_load_flow_solution_time = t.perf_counter() - start_solution_time
+        self.copy_voltages_to_dlf_obj()
         if print_solution:
             print('\n', "****** Load flow completed in ", iloop, " iterations ******", '\n')
 
