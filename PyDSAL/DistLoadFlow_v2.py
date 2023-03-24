@@ -15,9 +15,11 @@ import math
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1 import host_subplot
+import time as t
 
-import DistribObjects_v2
-from BuildSystem_v2 import *
+#import PyDSAL.DistribObjects_v2 as DistribObjects_v2 # import DistribObjects_v2
+#from BuildSystem_v2 import *
+#import PyDSAL.BuildSystem_v2 as BuildSystem_v2
 
 # Graphics representation
 from pyvis.network import Network
@@ -46,7 +48,7 @@ class DistLoadFlow3:
         self.system_Ploss, self.system_Qloss = 0, 0
         self.backup_feeders = []
         self.alteredTopology = False
-
+        self.latest_load_flow_solution_time = None
     def config3(self):
         """Function for making the topology - it sets up the connection between two buses by assigned the line to the to bus
         and by preparing a list of from bus connections (branching)
@@ -489,7 +491,7 @@ class DistLoadFlow3:
             self.config3()
             mesh = self.findtree()
             self.config3()
-            self.topology = dlf.mainstruct4()
+            self.topology = dlf.mainstruct4() # self.mainstruct4()
             print('\nNetwork was altered due to an overload at bus: ' + str([o.busnum for o in overloaded]) + '\n' +
                   'Network was altered by connecting line: ' + str(self.LineList.index(connected)) + ' between bus: ' +
                   str(connected.tbus) + ' and ' + str(connected.fbus))
@@ -570,7 +572,7 @@ class DistLoadFlow3:
             self.tableplot(mainlist, title, colind, rowno, columncol=[], rowcol=[])
 
     # Conduct a distribution system load flow based on FBS
-    def DistLF(self, epsilon=0.0001):
+    def DistLF(self, epsilon=0.0001, print_solution=False):
         """ Solves the distribution load flow until the convergence criteria is met for all buses.
         The two first steps are to set up additions topology information and to build the main structure
         Next,it is switched between forward sweeps(Voltage updates) and backward sweeps(load update and loss calcuation)
@@ -589,14 +591,16 @@ class DistLoadFlow3:
             self.alteredTopology = False
 
 # Flat start option has to be considered
+
+        start_solution_time = t.perf_counter()
         self.flatStart()
 
         diff = 10
         iloop = 0
         while diff > epsilon:
             self.system_P, self.system_Q, self.system_Ploss, self.system_Qloss = self.accload(self.topology, self.BusList)
-
-            print('Iter: ', iloop + 1, 'Pload:', '{:7.4f}'.format(self.system_P), 'Qload:', '{:7.4f}'.format(self.system_Q),
+            if print_solution:
+                print('Iter: ', iloop + 1, 'Pload:', '{:7.4f}'.format(self.system_P), 'Qload:', '{:7.4f}'.format(self.system_Q),
                   'Ploss:', '{:7.4f}'.format(self.system_Ploss), 'Qloss:', '{:7.4f}'.format(self.system_Qloss))
 
             oldVs = []
@@ -616,7 +620,9 @@ class DistLoadFlow3:
 #        overload = self.checkOverLoad()
 #        if len(overload) > 0:
 #            self.handleOverload(overload)
-        print('\n', "****** Load flow completed in ", iloop, " iterations ******", '\n')
+        self.latest_load_flow_solution_time = t.perf_counter() - start_solution_time
+        if print_solution:
+            print('\n', "****** Load flow completed in ", iloop, " iterations ******", '\n')
 
     # Visit all nodes in the reverse list.
     def BackwardSearch(self, topologyList):
