@@ -58,6 +58,14 @@ class LoadFlow:
         completely unneccesary function, but was the first thing i did.
         :return: ybus
         '''
+        # If statement to remove spare lines at the end of input file.
+        # Avoids zero division
+
+        def calc_y_bus_entry(l):
+            return 1 / l.r + 1 / (l.x * 1j)
+
+        if len(self.LineList) != len(self.BusList):
+            self.LineList = self.LineList[:len(self.BusList)-1]
 
         ybus = np.zeros((len(self.BusList), len(self.BusList)), dtype=complex)
         for line in self.LineList:
@@ -65,12 +73,13 @@ class LoadFlow:
             Gives all the off-diagonal elements in the ybus. The following line is repeated with flipped indices to 
             create a complete Y_bus matrix.
             '''
-            ybus[line.fbus - 1, line.tbus - 1] += 1 / line.r + 1 / (line.x * 1j)
-            ybus[line.tbus - 1, line.fbus - 1] += 1 / line.r + 1 / (line.x * 1j)
+
+            ybus[line.fbus - 1, line.tbus - 1] += calc_y_bus_entry(line) #1 / line.r + 1 / (line.x * 1j)
+            ybus[line.tbus - 1, line.fbus - 1] += calc_y_bus_entry(line) #1 / line.r + 1 / (line.x * 1j)
 
             # gives alle the diagonal elements
-            ybus[line.fbus - 1, line.fbus - 1] += 1 / line.r + 1 / (line.x * 1j)
-            ybus[line.tbus - 1, line.tbus - 1] += 1 / line.r + 1 / (line.x * 1j)
+            ybus[line.fbus - 1, line.fbus - 1] += calc_y_bus_entry(line) #1 / line.r + 1 / (line.x * 1j)
+            ybus[line.tbus - 1, line.tbus - 1] += calc_y_bus_entry(line) #1 / line.r + 1 / (line.x * 1j)
 
         return ybus
 
@@ -135,7 +144,7 @@ class LoadFlow:
         '''
         function returns the line object that connects the two buses.
         note the indent of the return statement: This must be there, as the line_obj will not be created for lines not
-        matching the criteria. If the criteria do not match there will be no line to return.
+        matching the criteria. If the criteria do not match there will be no line to return, and a none-type is returned.
         :param fbus: from bus
         :param tbus: to bus
         :return: line object connecting the two buses
@@ -158,9 +167,20 @@ class LoadFlow:
         return bus
 
     def admittance(self, fbus, tbus):
+        '''
+        Fucntion to obtain the admittance between two buses.
+        :param fbus: from bus
+        :param tbus: to bus
+        :return: given a connection between two buses, it returns the admittance between them
+                 If there exists no admittance the function returns a complex zero.
+                 Return value must be complex for compatibility with g_ij and b_ij
+        '''
         if fbus != tbus:
-            line = self.linelookup(fbus,tbus)
-            return 1.0 / complex(line.r, line.x)
+            line = self.linelookup(fbus, tbus)
+            if line is None:
+                return complex(0,0)
+            else:
+                return 1.0 / complex(line.r, line.x)
         elif fbus == tbus:
             connected_lines = self.find_lines_from_bus(fbus)
             admittance = complex(0,0)
@@ -228,7 +248,7 @@ class LoadFlow:
                 tbusidx = tbusnum - 1
                 if PorQ == 'P' and var == 'D': #dP/dD, D represents theta
                     if fbusnum != tbusnum:
-                        jac[row,column] = -self.vomag[fbusidx] * self.vomag[tbusidx] * self.uij(fbusnum,tbusnum)
+                        jac[row, column] = -self.vomag[fbusidx] * self.vomag[tbusidx] * self.uij(fbusnum, tbusnum)
                         continue
                     else:
                         connected_lines = self.find_lines_from_bus(fbusnum)
