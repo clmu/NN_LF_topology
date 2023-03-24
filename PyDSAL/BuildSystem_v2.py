@@ -13,16 +13,17 @@
 #       and/or other materials provided with the distribution.
 
 import numpy as np
-from DistribObjects_v2 import *
+#from DistribObjects_v2 import *
+from PyDSAL.DistribObjects_v2 import Bus, Line
 import pandas as pd
 
-from MenuFunctions_v2 import ViewFileName
+from PyDSAL.MenuFunctions_v2 import ViewFileName
 
-def BuildSystem3():
+def BuildSystem3(file=None):
     def renumber(BusList, LineList):
         iloop1 = 0
         sbase = 1   # assume that input values of load are in PU.
-        temp = np.zeros(2000,dtype=int)
+        temp = np.zeros(2000, dtype=int)
         while iloop1 < len(BusList):
             obj = BusList[iloop1]
             obj.busext = obj.busnum
@@ -43,7 +44,8 @@ def BuildSystem3():
 
     BusList = []
     LineList = []
-    file = ViewFileName(filext="xls")
+    if file is None:
+        file = ViewFileName(filext="xls")
     xls = pd.ExcelFile(file)
     df2 = pd.read_excel(xls, 'Bus', usecols="A:M")
     values = df2.values
