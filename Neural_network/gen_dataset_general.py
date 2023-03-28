@@ -45,9 +45,11 @@ def gen_single_set(ref_obj, lf_obj, accuracy=0.00001, low=0.8, high=1.2):
         lf_obj.BusList[bus_idx].pload = altered_pload
         lf_obj.BusList[bus_idx].qload = altered_qload
         if bus_idx > 0: #for all samples other than slack bus, store loads in array
-            input_sample[bus_idx - 1], input_sample[(bus_idx - 1) * 2] = altered_pload, altered_qload
-    lf_obj.vomag = np.ones(len(lf_obj.vomag), dtype=float)
-    lf_obj.voang = np.zeros(len(lf_obj.voang), dtype=float)
+            #input_sample[bus_idx - 1], input_sample[(bus_idx - 1) * 2] = altered_pload, altered_qload
+            input_sample[bus_idx - 1], input_sample[(bus_idx - 1) + len(ref_obj.BusList)-1] = altered_pload, altered_qload
+                                                        #NB!!! cannot simply multiply by two
+    lf_obj.vomag = np.ones(len(lf_obj.vomag), dtype=float) #remove NaNs
+    lf_obj.voang = np.zeros(len(lf_obj.voang), dtype=float)#remove Nans
     lf_obj.DistLF(accuracy)
     output_sample[:len(ref_obj.BusList)-1] = lf_obj.vomag[1:len(ref_obj.BusList)]
     output_sample[len(ref_obj.BusList)-1:] = lf_obj.voang[1:len(ref_obj.BusList)]
@@ -102,10 +104,10 @@ filename_large = 'large_dataset'
 m_dlf_buses, m_dlf_lines = BuildSystem3(system_description_folder_large_sys + medium_sys_filename)
 l_dlf_buses, l_dlf_lines = BuildSystem3(system_description_folder_large_sys + large_sys_filename)
 
-#reference_object = dlf(m_dlf_buses, m_dlf_lines)
-#solution_object = dlf(m_dlf_buses, m_dlf_lines)
-reference_object = dlf(l_dlf_buses, l_dlf_lines)
-solution_object = dlf(l_dlf_buses, l_dlf_lines)
+reference_object = dlf(m_dlf_buses, m_dlf_lines)
+solution_object = dlf(m_dlf_buses, m_dlf_lines)
+#reference_object = dlf(l_dlf_buses, l_dlf_lines)
+#solution_object = dlf(l_dlf_buses, l_dlf_lines)
 
 for obj in [reference_object, solution_object]:
     obj.initialize(startBus=1)
@@ -114,10 +116,10 @@ gen_dataset(reference_object,
             solution_object,
             nr_of_samples=60000,
             path_to_storage_folder=path_storage_folder,
-            name_prefix='large')
+            name_prefix='medium')
 
-inputs = load(path=path_storage_folder, filename='large_inputs.obj')
-outputs = load(path=path_storage_folder, filename='large_outputs.obj')
+inputs = load(path=path_storage_folder, filename='medium_inputs.obj')
+outputs = load(path=path_storage_folder, filename='medium_outputs.obj')
 
 '''
 accuracy = 0.00001
