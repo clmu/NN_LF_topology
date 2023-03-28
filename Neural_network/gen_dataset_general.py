@@ -6,14 +6,91 @@ from LF_3bus.ElkLoadFlow import LoadFlow
 from LF_3bus.build_sys_from_sheet import BuildSystem
 from PyDSAL.DistLoadFlow_v2 import DistLoadFlow3 as dlf
 from PyDSAL.BuildSystem_v2 import BuildSystem3
-
+from Neural_network.NN_objects import pickle_store_object as store
+from Neural_network.NN_objects import pickle_load_obj as load
 
 
 def check_similarity(vec_1, vec_2):
+
     #if len(vec_1) != len(vec_2):
     #    print('Vectors not of same length')
     #else:
     return vec_1 - vec_2
+
+
+def gen_single_set(ref_obj, lf_obj, accuracy=0.00001, low=0.8, high=1.2):
+
+    '''
+    Function takes in two DLF objects, and solves a random FBS for one object before returning the input and output
+     data as np.arrays for later use. One of the objects acts as a reference to keep the original values used as a
+     baseline, the other to store the randomly generated loads. The objects should be initialized using identical
+     procedures.
+    :param ref_ob: DLF object containing the original load data.
+    :param lf_obj: DLF objet containing the randomly generated load data.
+    :param low: low boundary for random generation
+    :param high: high boundary for random generation
+    :return: np.arrays of input data and solutions.
+    '''
+
+    if len(ref_obj.BusList) != len(lf_obj.BusList):
+        raise Exception('DLF objects are not identical')
+
+    #low, high = 0.8, 1.2
+    input_sample = np.zeros((len(ref_obj.BusList)-1)*2, dtype=float)
+    output_sample = np.zeros((len(ref_obj.BusList)-1)*2, dtype=float)
+
+    for bus_idx in range(len(ref_obj.BusList)):
+        altered_pload = ref_obj.BusList[bus_idx].pload * np.random.uniform(low=low, high=high)
+        altered_qload = ref_obj.BusList[bus_idx].qload * np.random.uniform(low=low, high=high)
+        lf_obj.BusList[bus_idx].pload = altered_pload
+        lf_obj.BusList[bus_idx].qload = altered_qload
+        if bus_idx > 0: #for all samples other than slack bus, store loads in array
+            input_sample[bus_idx - 1], input_sample[(bus_idx - 1) * 2] = altered_pload, altered_qload
+    lf_obj.vomag = np.ones(len(lf_obj.vomag), dtype=float)
+    lf_obj.voang = np.zeros(len(lf_obj.voang), dtype=float)
+    lf_obj.DistLF(accuracy)
+    output_sample[:len(ref_obj.BusList)-1] = lf_obj.vomag[1:len(ref_obj.BusList)]
+    output_sample[len(ref_obj.BusList)-1:] = lf_obj.voang[1:len(ref_obj.BusList)]
+
+    return input_sample, output_sample
+
+def gen_dataset(ref, lf, nr_of_samples=60000, path_to_storage_folder='NO_PATH_PROVIDED', name_prefix=''):
+    i1, o1 = gen_single_set(ref, lf)
+    inputs = np.zeros((nr_of_samples, len(i1)), dtype=float)
+    outputs = np.zeros((nr_of_samples, len(i1)), dtype=float)
+    start = t.perf_counter()
+    '''
+    for sample in range(nr_of_samples): #change to while loop to generate a fixed number of samples?
+        try:
+            inputs[sample], outputs[sample] = gen_single_set(ref, lf)
+        except StopIteration:
+            inputs = np.delete(inputs, sample, axis=0)
+            outputs = np.delete(outputs, sample, axis=0)
+        if sample % 5000 == 0:
+            print(f'{sample} samples finished in a total of {t.perf_counter()-start} seconds')'''
+    sample = 0
+    tries = 0
+    convergence_failures = 0
+    while sample < nr_of_samples:  # change to while loop to generate a fixed number of samples?
+        try:
+            inputs[sample], outputs[sample] = gen_single_set(ref, lf, low=0.8, high=1.2)
+            sample += 1
+        except StopIteration:
+            #inputs = np.delete(inputs, sample, axis=0)ll
+            #outputs = np.delete(outputs, sample, axis=0)
+            convergence_failures += 1
+            print(f'total convergence failures: {convergence_failures}')
+            sample -= 1 #Go back, try a new randomly generated sample.
+        finally:
+            tries += 1
+            if sample % 5000 == 0:
+                print(f'{sample} samples finished in a total of {t.perf_counter() - start} seconds')
+            if tries > 3 * nr_of_samples: # Break out of the loop if
+                print('Tried more than three times the amount of samples required. Outputs likely not valid.')
+                break
+    store(inputs, path=path_to_storage_folder, filename=name_prefix + '_inputs')
+    store(outputs, path=path_to_storage_folder, filename=name_prefix + '_outputs')
+    return convergence_failures
 
 system_description_folder_large_sys= '/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/'
 medium_sys_filename = 'IEEE33BusDSAL.xls'
@@ -22,6 +99,37 @@ path_storage_folder = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_netwo
 filename_medium = 'medium_dataset'
 filename_large = 'large_dataset'
 
+m_dlf_buses, m_dlf_lines = BuildSystem3(system_description_folder_large_sys + medium_sys_filename)
+l_dlf_buses, l_dlf_lines = BuildSystem3(system_description_folder_large_sys + large_sys_filename)
+
+#reference_object = dlf(m_dlf_buses, m_dlf_lines)
+#solution_object = dlf(m_dlf_buses, m_dlf_lines)
+reference_object = dlf(l_dlf_buses, l_dlf_lines)
+solution_object = dlf(l_dlf_buses, l_dlf_lines)
+
+for obj in [reference_object, solution_object]:
+    obj.initialize(startBus=1)
+
+gen_dataset(reference_object,
+            solution_object,
+            nr_of_samples=60000,
+            path_to_storage_folder=path_storage_folder,
+            name_prefix='large')
+
+inputs = load(path=path_storage_folder, filename='large_inputs.obj')
+outputs = load(path=path_storage_folder, filename='large_outputs.obj')
+
+'''
+accuracy = 0.00001
+single_sample_gen_start = t.perf_counter()
+r_in_1, r_o_1 = gen_single_set(reference_object, solution_object, accuracy=accuracy)
+r_in_2, r_o_2 = gen_single_set(reference_object, solution_object, accuracy=accuracy)
+single_sample_end = (t.perf_counter()-single_sample_gen_start) / 2
+
+difference_between_solutions = r_o_1 - r_o_2
+'''
+
+'''
 m_buses, m_lines = BuildSystem(system_description_folder_large_sys + medium_sys_filename)
 l_buses, l_lines = BuildSystem(system_description_folder_large_sys + large_sys_filename)
 m_dlf_buses, m_dlf_lines = BuildSystem3(system_description_folder_large_sys + medium_sys_filename)
@@ -62,7 +170,9 @@ plt.plot(m_buses, m_vomag_similarity, label='vomag_sim')
 plt.legend()
 plt.show()
 
-#m_dlf_minus_lf_vomag =
+'''
+
+
 
 
 

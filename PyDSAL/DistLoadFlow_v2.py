@@ -622,8 +622,9 @@ class DistLoadFlow3:
             newVs = []
             iloop += 1
             if iloop > 15:
-                print('Convergence could not be reached.')
-                return
+                #print('Convergence could not be reached.')
+                raise StopIteration('Convergence could not be reached')
+                #return None
             diffs = []
             for i in range(0, len(self.BusList)):
                 newVs.append(self.BusList[i].vomag)
