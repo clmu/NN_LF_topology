@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.random import default_rng
 import time as t
 
 import matplotlib.pyplot as plt
@@ -40,8 +41,14 @@ def gen_single_set(ref_obj, lf_obj, accuracy=0.00001, low=0.8, high=1.2):
     output_sample = np.zeros((len(ref_obj.BusList)-1)*2, dtype=float)
 
     for bus_idx in range(len(ref_obj.BusList)):
+        ''' #old numpy random
         altered_pload = ref_obj.BusList[bus_idx].pload * np.random.uniform(low=low, high=high)
         altered_qload = ref_obj.BusList[bus_idx].qload * np.random.uniform(low=low, high=high)
+        '''
+        #new numpy random
+        generator = default_rng()
+        altered_pload = ref_obj.BusList[bus_idx].pload * generator.uniform(low=low, high=high)
+        altered_qload = ref_obj.BusList[bus_idx].qload * generator.uniform(low=low, high=high)
         lf_obj.BusList[bus_idx].pload = altered_pload
         lf_obj.BusList[bus_idx].qload = altered_qload
         if bus_idx > 0: #for all samples other than slack bus, store loads in array

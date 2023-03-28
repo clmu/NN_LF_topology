@@ -19,30 +19,85 @@ from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.custom_loss_function import loss_acc_for_lineflows,\
     CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
 
-#norm_inputs = 2 #value to ensure all inputs are between 0 and 1.
-#norm_outputs = 10 #value to make outputs greater to increase performance of meanSquaredError
+def load_loss_function(loss_fun_name):
+    if loss_fun_name == 'MSE':
+        return tf.keras.losses.MSE
+    elif loss_fun_name == 'CustomLoss':
+        return CustomLoss
+    elif loss_fun_name == 'SquaredLineFlowLoss':
+        return SquaredLineFlowLoss
+    elif loss_fun_name == 'LineFlowLossForAngle':
+        return LineFlowLossForAngle
 
-# PATHS to containers
+def load_architecture(network_name):
+    if network_name == 'small_':
+        return [6, 12, 12, 12, 6]
+    elif network_name == 'medium_':
+        return [64, 128, 128, 128, 64]
+    elif network_name == 'large_':
+        return [136, 272, 272, 272, 136]
+
+def set_params_and_init_nn(model, data_in_name='', data_out_name='', pickle_load=False):
+    # NN parameters
+    model.epochs = 30
+    model.batch_size = 20
+    model.initializer = tf.keras.initializers.glorot_uniform(seed=0)
+                                            # THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
+    model.init_data(data_in_name,
+                    data_out_name,
+                    0.2,
+                    datapath=path_to_data,
+                    scale_data_out=True,
+                    pickle_load=pickle_load)
+    model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=False)
+    pass
+
+'''# PATHS to containers for small network
 path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
 path_to_nn_folder = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
 path_to_system_description_file = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/4 bus 1 gen.xls'
-cp_path_MSE = 'cp_small_MSE_short/cp_{epoch:04d}'
-cp_path_custom_loss = path_to_nn_folder + 'cp_small_CustomLoss/cp_{epoch:04d}'
-cp_path_square_loss = path_to_nn_folder + 'cp_small_SquaredLineFlowLoss/cp_{epoch:04d}'
-cp_path_angle_loss = path_to_nn_folder + 'cp_small_LineFlowLossForAngle/cp_{epoch:04d}'
+cp_path_MSE = 'checkpoints/cp_small_MSE_short/cp_{epoch:04d}'
+cp_path_custom_loss = path_to_nn_folder + 'checkpoints/cp_small_CustomLoss/cp_{epoch:04d}'
+cp_path_square_loss = path_to_nn_folder + 'checkpoints/cp_small_SquaredLineFlowLoss/cp_{epoch:04d}'
+cp_path_angle_loss = path_to_nn_folder + 'checkpoints/cp_small_LineFlowLossForAngle/cp_{epoch:04d}'
 nn_regular_mse = NN()
 nn_custom_loss = NN()
 nn_square_loss = NN()
 nn_angle_loss = NN()
 list_of_nn_objs = [nn_regular_mse, nn_custom_loss, nn_square_loss, nn_angle_loss]
 
-architecture = [6, 12, 12, 12, 6]
+architecture = [6, 12, 12, 12, 6]'''
+
+nn_obj = NN()
+
+path_to_system_description_file = '/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/IEEE33BusDSAL.xls'
+path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
+
+network_name = 'medium' + '_'
+#network_name = 'large'
+network_loss_function = 'MSE'
+input_data_name = network_name + 'inputs.obj'
+output_data_name = network_name + 'outputs.obj'
+cp_folder_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_' + \
+                        network_name + network_loss_function
+arch = load_architecture(network_name)
+loss = load_loss_function(network_loss_function)
+nn_obj.architecture = arch
+nn_obj.loss_fn = loss
+set_params_and_init_nn(nn_obj, data_in_name=input_data_name, data_out_name=output_data_name, pickle_load=True)
+
+
+'''nn_regular_mse = NN()
+nn_custom_loss = NN()
+nn_square_loss = NN()
+nn_angle_loss = NN()
+list_of_nn_objs = [nn_regular_mse, nn_custom_loss, nn_square_loss, nn_angle_loss]'''
+
 
 # loss functions # NB: depend on output normalizer from NN, do not change this later on.
-custom_loss = CustomLoss(path=path_to_system_description_file, o_norm=nn_custom_loss.get_norm_output())
+'''custom_loss = CustomLoss(path=path_to_system_description_file, o_norm=nn_custom_loss.get_norm_output())
 custom_square_loss = SquaredLineFlowLoss(path=path_to_system_description_file, o_norm=nn_custom_loss.get_norm_output())
 only_angle_loss = LineFlowLossForAngle(path=path_to_system_description_file, o_norm=nn_custom_loss.get_norm_output())
-
 nn_regular_mse.loss_fn = tf.keras.losses.MSE
 nn_custom_loss.loss_fn = custom_loss
 nn_square_loss.loss_fn = custom_square_loss
@@ -58,10 +113,10 @@ for model in list_of_nn_objs:
                      0.2,
                      datapath=path_to_data,
                      scale_data_out=True)
-    model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True, custom_loss=False)
+    model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True, custom_loss=False)'''
 
 
-nn_regular_mse.train_model(checkpoints=True,  cp_folder_path=cp_path_MSE, save_freq=120*nn_custom_loss.batch_size)
+nn_obj.train_model(checkpoints=True,  cp_folder_path=cp_folder_path, save_freq=120*nn_obj.batch_size)
 
 
 '''
