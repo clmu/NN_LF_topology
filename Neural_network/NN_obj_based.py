@@ -21,7 +21,9 @@ from Neural_network.custom_loss_function import loss_acc_for_lineflows,\
 
 def load_loss_function(loss_fun_name):
     if loss_fun_name == 'MSE':
-        return tf.keras.losses.MSE
+        return tf.keras.losses.mean_squared_error
+    elif loss_fun_name == 'ME':
+        return tf.keras.losses.mean_absolute_error
     elif loss_fun_name == 'CustomLoss':
         return CustomLoss
     elif loss_fun_name == 'SquaredLineFlowLoss':
@@ -75,7 +77,7 @@ path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/data
 
 network_name = 'medium' + '_'
 #network_name = 'large'
-network_loss_function = 'MSE'
+network_loss_function = 'ME'
 input_data_name = network_name + 'inputs.obj'
 output_data_name = network_name + 'outputs.obj'
 cp_folder_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_' + \
