@@ -1,6 +1,7 @@
 import numpy as np
 from numpy.random import default_rng
 import time as t
+import random
 
 import matplotlib.pyplot as plt
 from LF_3bus.ElkLoadFlow import LoadFlow
@@ -18,8 +19,22 @@ def check_similarity(vec_1, vec_2):
     #else:
     return vec_1 - vec_2
 
+def gen_p_q_tuple(buslist):
+    '''
+    Function that stores system loading in two tuples.
+    :param buslist: buslist of a DLF object.
+    :return: two tuples containing the system p and q loading respectively.
+    '''
+    p = np.zeros(len(buslist), dtype=float)
+    q = np.zeros(len(buslist), dtype=float)
+    for bus_idx in range(len(buslist)):
+        p[bus_idx] = buslist[bus_idx].pload
+        q[bus_idx] = buslist[bus_idx].pload
+    p_tup = tuple(p)
+    q_tup = tuple(p)
+    return p_tup, q_tup
 
-def gen_single_set(ref_obj, lf_obj, accuracy=0.00001, low=0.8, high=1.2):
+def gen_single_set(lf_obj, p_pows, q_pows, accuracy=0.00001, low=0.8, high=1.2):
 
     '''
     Function takes in two DLF objects, and solves a random FBS for one object before returning the input and output
@@ -33,40 +48,49 @@ def gen_single_set(ref_obj, lf_obj, accuracy=0.00001, low=0.8, high=1.2):
     :return: np.arrays of input data and solutions.
     '''
 
-    if len(ref_obj.BusList) != len(lf_obj.BusList):
-        raise Exception('DLF objects are not identical')
+    #if len(ref_obj.BusList) != len(lf_obj.BusList):
+    #    raise Exception('DLF objects are not identical')
+
 
     #low, high = 0.8, 1.2
-    input_sample = np.zeros((len(ref_obj.BusList)-1)*2, dtype=float)
-    output_sample = np.zeros((len(ref_obj.BusList)-1)*2, dtype=float)
+    input_sample = np.zeros((len(lf_obj.BusList)-1)*2, dtype=float)
+    output_sample = np.zeros((len(lf_obj.BusList)-1)*2, dtype=float)
 
-    for bus_idx in range(len(ref_obj.BusList)):
+    for bus_idx in range(len(lf_obj.BusList)):
         ''' #old numpy random
         altered_pload = ref_obj.BusList[bus_idx].pload * np.random.uniform(low=low, high=high)
         altered_qload = ref_obj.BusList[bus_idx].qload * np.random.uniform(low=low, high=high)
         '''
+
         #new numpy random
         generator = default_rng()
-        altered_pload = ref_obj.BusList[bus_idx].pload * generator.uniform(low=low, high=high)
-        altered_qload = ref_obj.BusList[bus_idx].qload * generator.uniform(low=low, high=high)
+        altered_pload = p_pows[bus_idx] * generator.uniform(low=low, high=high)
+        altered_qload = q_pows[bus_idx] * generator.uniform(low=low, high=high)
+        '''
+        seed = random.seed()
+        altered_pload = ref_obj.BusList[bus_idx].pload * random.uniform(low, high)
+        altered_qload = ref_obj.BusList[bus_idx].qload * random.uniform(low, high)
+        '''
         lf_obj.BusList[bus_idx].pload = altered_pload
         lf_obj.BusList[bus_idx].qload = altered_qload
         if bus_idx > 0: #for all samples other than slack bus, store loads in array
             #input_sample[bus_idx - 1], input_sample[(bus_idx - 1) * 2] = altered_pload, altered_qload
-            input_sample[bus_idx - 1], input_sample[(bus_idx - 1) + len(ref_obj.BusList)-1] = altered_pload, altered_qload
+            input_sample[bus_idx - 1], input_sample[(bus_idx - 1) + len(lf_obj.BusList)-1] = altered_pload, altered_qload
                                                         #NB!!! cannot simply multiply by two
     lf_obj.vomag = np.ones(len(lf_obj.vomag), dtype=float) #remove NaNs
     lf_obj.voang = np.zeros(len(lf_obj.voang), dtype=float)#remove Nans
     lf_obj.DistLF(accuracy)
-    output_sample[:len(ref_obj.BusList)-1] = lf_obj.vomag[1:len(ref_obj.BusList)]
-    output_sample[len(ref_obj.BusList)-1:] = lf_obj.voang[1:len(ref_obj.BusList)]
+    output_sample[:len(lf_obj.BusList)-1] = lf_obj.vomag[1:len(lf_obj.BusList)]
+    output_sample[len(lf_obj.BusList)-1:] = lf_obj.voang[1:len(lf_obj.BusList)]
 
     return input_sample, output_sample
 
-def gen_dataset(ref, lf, nr_of_samples=60000, path_to_storage_folder='NO_PATH_PROVIDED', name_prefix=''):
-    i1, o1 = gen_single_set(ref, lf)
+def gen_dataset(lf, nr_of_samples=60000, path_to_storage_folder='NO_PATH_PROVIDED', name_prefix=''):
+    p_s, q_s = gen_p_q_tuple(lf.BusList)
+    i1, o1 = gen_single_set(lf, p_s, q_s)
     inputs = np.zeros((nr_of_samples, len(i1)), dtype=float)
     outputs = np.zeros((nr_of_samples, len(i1)), dtype=float)
+
     start = t.perf_counter()
     '''
     for sample in range(nr_of_samples): #change to while loop to generate a fixed number of samples?
@@ -82,7 +106,7 @@ def gen_dataset(ref, lf, nr_of_samples=60000, path_to_storage_folder='NO_PATH_PR
     convergence_failures = 0
     while sample < nr_of_samples:  # change to while loop to generate a fixed number of samples?
         try:
-            inputs[sample], outputs[sample] = gen_single_set(ref, lf, low=0.8, high=1.2)
+            inputs[sample], outputs[sample] = gen_single_set(lf, p_s, q_s, low=0.8, high=1.2)
             sample += 1
         except StopIteration:
             #inputs = np.delete(inputs, sample, axis=0)ll
@@ -111,16 +135,13 @@ filename_large = 'large_dataset'
 m_dlf_buses, m_dlf_lines = BuildSystem3(system_description_folder_large_sys + medium_sys_filename)
 l_dlf_buses, l_dlf_lines = BuildSystem3(system_description_folder_large_sys + large_sys_filename)
 
-reference_object = dlf(m_dlf_buses, m_dlf_lines)
+
 solution_object = dlf(m_dlf_buses, m_dlf_lines)
-#reference_object = dlf(l_dlf_buses, l_dlf_lines)
 #solution_object = dlf(l_dlf_buses, l_dlf_lines)
 
-for obj in [reference_object, solution_object]:
-    obj.initialize(startBus=1)
+solution_object.initialize(startBus=1)
 
-gen_dataset(reference_object,
-            solution_object,
+gen_dataset(solution_object,
             nr_of_samples=60000,
             path_to_storage_folder=path_storage_folder,
             name_prefix='medium')
