@@ -1,6 +1,7 @@
 import numpy as np
 import time
 import tensorflow as tf
+from Neural_network.NN_objects import pickle_load_obj as load
 
 def verification_predictions(verification_input_data, model):
 
@@ -24,7 +25,7 @@ def verification_predictions(verification_input_data, model):
     avg_model_prediction_time = np.average(model_prediction_time)
     return model_predictions, avg_model_prediction_time
 
-def import_data(inputfilename, outputfilename, datapath='', verification_fraction=0.2, norm_input=1, norm_output=1):
+def import_data(inputfilename, outputfilename, datapath='', verification_fraction=0.2, norm_input=1, norm_output=1, pickle_import=False):
 
     '''
     Function to import data for generating neural networks.
@@ -36,9 +37,12 @@ def import_data(inputfilename, outputfilename, datapath='', verification_fractio
     :param norm_output:
     :return:
     '''
-
-    inputdata = np.load(datapath + inputfilename)
-    outputdata = np.load(datapath + outputfilename)
+    if pickle_import:
+        inputdata = load(path=datapath, filename=inputfilename)
+        outputdata = load(path=datapath, filename=outputfilename)
+    else:
+        inputdata = np.load(datapath + inputfilename)
+        outputdata = np.load(datapath + outputfilename)
 
     nr_samples, nr_input_var = np.shape(inputdata)
     verification_samples = int(nr_samples // (1/verification_fraction))
