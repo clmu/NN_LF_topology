@@ -101,7 +101,7 @@ class NeuralNetwork:
     def get_norm_output(self):
         return self._norm_output
 
-    def init_data(self, name_data_in, name_data_out, ver_frac=None, datapath='', scale_data_out=False):
+    def init_data(self, name_data_in, name_data_out, ver_frac=None, datapath='', scale_data_out=False, pickle_load=False):
 
         '''
         Function to initialize data
@@ -114,9 +114,12 @@ class NeuralNetwork:
 
         if scale_data_out:
             o_scale = self._norm_output
-
-        inputdata = np.load(datapath + name_data_in)
-        outputdata = np.load(datapath + name_data_out)
+        if pickle_load:
+            inputdata = pickle_load_obj(path=datapath, filename=name_data_in)
+            outputdata = pickle_load_obj(path=datapath, filename=name_data_out)
+        else:
+            inputdata = np.load(datapath + name_data_in)
+            outputdata = np.load(datapath + name_data_out)
 
         nr_samples, nr_input_var = np.shape(inputdata)
         v_samples = int(nr_samples // (1/ver_frac))
