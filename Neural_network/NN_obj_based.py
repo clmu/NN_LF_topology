@@ -78,11 +78,11 @@ path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/data
 
 network_name = 'medium' + '_'
 #network_name = 'large'
-network_loss_function = 'CustomLoss'
+network_loss_function = 'SquaredLineFlowLoss'
 input_data_name = network_name + 'inputs.obj'
 output_data_name = network_name + 'outputs.obj'
 cp_folder_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_' + \
-                        network_name + network_loss_function
+                        network_name + network_loss_function #+ '/next30'
 cp_folder_and_name = cp_folder_path + '/cp_{epoch:04d}'
 arch = load_architecture(network_name)
 loss = load_loss_function(network_loss_function, path_to_sys_file=path_to_system_description_file)
