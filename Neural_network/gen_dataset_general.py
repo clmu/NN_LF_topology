@@ -136,18 +136,18 @@ m_dlf_buses, m_dlf_lines = BuildSystem3(system_description_folder_large_sys + me
 l_dlf_buses, l_dlf_lines = BuildSystem3(system_description_folder_large_sys + large_sys_filename)
 
 
-solution_object = dlf(m_dlf_buses, m_dlf_lines)
-#solution_object = dlf(l_dlf_buses, l_dlf_lines)
+#solution_object = dlf(m_dlf_buses, m_dlf_lines)
+solution_object = dlf(l_dlf_buses, l_dlf_lines)
 
 solution_object.initialize(startBus=1)
 
 gen_dataset(solution_object,
             nr_of_samples=60000,
             path_to_storage_folder=path_storage_folder,
-            name_prefix='medium')
+            name_prefix='large')
 
-inputs = load(path=path_storage_folder, filename='medium_inputs.obj')
-outputs = load(path=path_storage_folder, filename='medium_outputs.obj')
+inputs = load(path=path_storage_folder, filename='large_inputs.obj')
+outputs = load(path=path_storage_folder, filename='large_outputs.obj')
 
 '''
 accuracy = 0.00001
