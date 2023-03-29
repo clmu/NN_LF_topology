@@ -18,18 +18,19 @@ import math
 from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.custom_loss_function import loss_acc_for_lineflows,\
     CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
+from Neural_network.NN_objects import pickle_store_object as store
 
-def load_loss_function(loss_fun_name):
+def load_loss_function(loss_fun_name, path_to_sys_file=''):
     if loss_fun_name == 'MSE':
         return tf.keras.losses.mean_squared_error
     elif loss_fun_name == 'ME':
         return tf.keras.losses.mean_absolute_error
     elif loss_fun_name == 'CustomLoss':
-        return CustomLoss
+        return CustomLoss(path=path_to_sys_file)
     elif loss_fun_name == 'SquaredLineFlowLoss':
-        return SquaredLineFlowLoss
+        return SquaredLineFlowLoss(path=path_to_sys_file)
     elif loss_fun_name == 'LineFlowLossForAngle':
-        return LineFlowLossForAngle
+        return LineFlowLossForAngle(path=path_to_sys_file)
 
 def load_architecture(network_name):
     if network_name == 'small_':
@@ -51,7 +52,7 @@ def set_params_and_init_nn(model, data_in_name='', data_out_name='', pickle_load
                     datapath=path_to_data,
                     scale_data_out=True,
                     pickle_load=pickle_load)
-    model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=False)
+    model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=True)
     pass
 
 '''# PATHS to containers for small network
@@ -77,13 +78,14 @@ path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/data
 
 network_name = 'medium' + '_'
 #network_name = 'large'
-network_loss_function = 'ME'
+network_loss_function = 'CustomLoss'
 input_data_name = network_name + 'inputs.obj'
 output_data_name = network_name + 'outputs.obj'
 cp_folder_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_' + \
                         network_name + network_loss_function
+cp_folder_and_name = cp_folder_path + '/cp_{epoch:04d}'
 arch = load_architecture(network_name)
-loss = load_loss_function(network_loss_function)
+loss = load_loss_function(network_loss_function, path_to_sys_file=path_to_system_description_file)
 nn_obj.architecture = arch
 nn_obj.loss_fn = loss
 set_params_and_init_nn(nn_obj, data_in_name=input_data_name, data_out_name=output_data_name, pickle_load=True)
@@ -117,9 +119,17 @@ for model in list_of_nn_objs:
                      scale_data_out=True)
     model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True, custom_loss=False)'''
 
+text  = 'This is the testfile.'
 
-nn_obj.train_model(checkpoints=True,  cp_folder_path=cp_folder_path, save_freq=120*nn_obj.batch_size)
+with open(cp_folder_path + 'textfile.txt', 'w') as f:
+    f.write(text)
 
+nn_obj.train_model(checkpoints=True,  cp_folder_path=cp_folder_and_name, save_freq=120*nn_obj.batch_size)
+thresholds = [20, 10, 5, 3]
+nn_obj.model_pred()
+nn_obj.generate_performance_data_dict_improved(thresholds)
+perf_dict_name = 'performance_epoch_' + str(nn_obj.epochs)
+store(nn_obj.performance_dict, path=cp_folder_path, filename=perf_dict_name)
 
 '''
 nn_custom_loss.train_model(checkpoints=False,
