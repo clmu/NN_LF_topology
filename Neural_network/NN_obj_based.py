@@ -19,6 +19,7 @@ from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.custom_loss_function import loss_acc_for_lineflows,\
     CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
 from Neural_network.NN_objects import pickle_store_object as store
+from Neural_network.NN_objects import load_architecture
 
 def load_loss_function(loss_fun_name, path_to_sys_file=''):
     if loss_fun_name == 'MSE':
@@ -31,14 +32,6 @@ def load_loss_function(loss_fun_name, path_to_sys_file=''):
         return SquaredLineFlowLoss(path=path_to_sys_file)
     elif loss_fun_name == 'LineFlowLossForAngle':
         return LineFlowLossForAngle(path=path_to_sys_file)
-
-def load_architecture(network_name):
-    if network_name == 'small_':
-        return [6, 12, 12, 12, 6]
-    elif network_name == 'medium_':
-        return [64, 128, 128, 128, 64]
-    elif network_name == 'large_':
-        return [136, 272, 272, 272, 136]
 
 def set_params_and_init_nn(model, data_in_name='', data_out_name='', pickle_load=False):
     # NN parameters
@@ -76,11 +69,11 @@ nn_obj = NN()
 path_to_system_description_file = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/' #'/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/IEEE33BusDSAL.xls'
 path_to_system_description_file += 'IEEE33BusDSAL.xls'
 path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
-network_name = 'medium' + '_'
+network_name = 'medium'
 #network_name = 'large'
 network_loss_function = 'LineFlowLossForAngle' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
-input_data_name = network_name + 'inputs.obj'
-output_data_name = network_name + 'outputs.obj'
+input_data_name = network_name + '_inputs.obj'
+output_data_name = network_name + '_outputs.obj'
 cp_folder_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_' + \
                         network_name + network_loss_function #+ '/next30'
 cp_folder_and_name = cp_folder_path + '/cp_{epoch:04d}'

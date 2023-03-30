@@ -3,12 +3,15 @@ import matplotlib.pyplot as plt
 from Neural_network.NN_objects import pickle_load_obj as load
 
 path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
-custom_cp_folder = 'cp_small_CustomLoss/'
-angle_cp_folder = 'cp_small_LineFlowLossForAngle/'
-square_cp_folder = 'cp_small_SquaredLineFlowLoss/'
-MSE_cp_folder = 'cp_small_MSE_short/'
+cp_folder = 'checkpoints/'
+network = 'medium'
+custom_cp_folder = 'cp_' + network + '_CustomLoss/'
+angle_cp_folder = 'cp_' + network + '_LineFlowLossForAngle/'
+square_cp_folder = 'cp_' + network + '_SquaredLineFlowLoss/'
+MSE_cp_folder = 'cp_' + network + '_MSE/'
 name = 'perf_dict.obj'
 
+path_to_data = path_to_data + cp_folder
 
 custom_loss_performance = load(path=path_to_data+custom_cp_folder, filename=name)
 angle_loss_performance = load(path=path_to_data+angle_cp_folder, filename=name)
@@ -31,7 +34,7 @@ def inches(cm):
 
 fig_savepath = '/home/clemens/Dropbox/EMIL_MIENERG21/Master/Master/Figures/Results/'
 
-ylim = [0, 6]
+ylim = [3, 10.5]
 
 plt.plot(checkpoints, averages[0], label='CustomLoss')
 plt.plot(checkpoints, averages[1], label='LineFlowLossForAngle')
@@ -47,4 +50,4 @@ plt.legend()
 plt.grid()
 #plt.rcParams['figure.figsize'] = (inches(12), inches(2))
 plt.gcf().set_size_inches(inches(16), inches(10))
-plt.savefig(fig_savepath + 'pinn_small_sys_new', dpi=600)
+plt.savefig(fig_savepath + 'pinn_medium_sys_new', dpi=600)

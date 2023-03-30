@@ -33,7 +33,7 @@ for err_fn in [mse, sq, cl, la]:
     print(f'finished eval of {err_fn} in {dict_list_calc_time} seconds')
     print(f'storing eval of {err_fn}')
 
-    store(perf_dicts, path=path_to_data+cp_folder, filename='perf_dict')
+    store(perf_dicts, path=path_to_data+cp_containing_folder+cp_folder, filename='perf_dict')
 
 print('performance dicts generated and stored')
 
