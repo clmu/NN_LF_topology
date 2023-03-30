@@ -170,7 +170,7 @@ def evaluate_cps_obj_new(cps, path_to_data='nopath', cp_folder='nofolder', archi
         number = 'cp_' + number  # + '.index'
         return number
 
-    cp_path = path_to_data + cp_folder
+    cp_path = path_to_data + 'checkpoints/' + cp_folder
     model_numbers = np.arange(1, cps + 1)
     file_exts = []
     models = []
@@ -178,15 +178,17 @@ def evaluate_cps_obj_new(cps, path_to_data='nopath', cp_folder='nofolder', archi
         models.append(NN())
         file_exts.append(gen_filename_ext(model_number))
 
+    network_size = cp_folder.split('_')[1] #fetches network size name
+
     for model in models:
         '''
         model.epochs = 30
         model.batch_size = 20
         model.initializer = tf.keras.initializers.glorot_uniform(seed=0)'''
-        model.init_data('simple data.npy',
-                        'simple o data.npy',
+        model.init_data(network_size + '_inputs.obj', #simple data.npy
+                        network_size + '_outputs.obj',# 'simple o data.npy',
                         0.2,
-                        datapath=path_to_data,
+                        datapath=path_to_data + 'datasets/',
                         scale_data_out=True)
         model.loss_fn = tf.keras.losses.MSE
         model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True)

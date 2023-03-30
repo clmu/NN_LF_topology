@@ -4,12 +4,11 @@ import time
 import tensorflow as tf
 import numpy as np
 import pickle
-import codecs
-import math
+from keras import layers
 from LF_3bus.build_sys_from_sheet import BuildSystem
 from LF_3bus.ElkLoadFlow import LoadFlow
 from tensorflow import keras
-from keras import layers
+
 from Neural_network.Custom_model import CustomModel
 layers = tf.keras.layers
 
@@ -55,6 +54,14 @@ def pickle_load_obj(path='', filename=''):
     obj = pickle.load(f)
     f.close()
     return obj
+
+def load_architecture(network_name):
+    if network_name == 'small':
+        return [6, 12, 12, 12, 6]
+    elif network_name == 'medium':
+        return [64, 128, 128, 128, 64]
+    elif network_name == 'large':
+        return [136, 272, 272, 272, 136]
 class NeuralNetwork:
     def __init__(self):
         self.l_rate = None #set in function init_nn_model
@@ -118,8 +125,8 @@ class NeuralNetwork:
             inputdata = pickle_load_obj(path=datapath, filename=name_data_in)
             outputdata = pickle_load_obj(path=datapath, filename=name_data_out)
         else:
-            inputdata = np.load(datapath + name_data_in)
-            outputdata = np.load(datapath + name_data_out)
+            inputdata = np.load(datapath + name_data_in, allow_pickle=True)
+            outputdata = np.load(datapath + name_data_out, allow_pickle=True)
 
         nr_samples, nr_input_var = np.shape(inputdata)
         v_samples = int(nr_samples // (1/ver_frac))

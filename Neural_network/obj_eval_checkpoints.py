@@ -1,23 +1,27 @@
-import tensorflow as tf
-import numpy as np
+#import tensorflow as tf
+#import numpy as np
 import time as t
 
-from Neural_network.NN_objects import NeuralNetwork as NN
+#from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.NN_objects import pickle_store_object as store
 from Neural_network.data_evaluation import evaluate_cps_obj_new
+from Neural_network.NN_objects import load_architecture
 
 
 path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
-network = 'small'
+training_data_folder = 'datasets/'
+cp_containing_folder = 'checkpoints/'
+#network = 'small'
+network = 'medium'
 sq = 'SquaredLineFlowLoss'
 cl = 'CustomLoss'
 la = 'LineFlowLossForAngle'
-mse = 'MSE_short'
-#cp_folder = 'cp_small_SquaredLineFlowLoss/'
+mse = 'MSE'
 
-architecture = [6, 12, 12, 12, 6]
+
+architecture = load_architecture(network)
 thresholds = [20, 10, 5, 3]
-for err_fn in [sq, cl, la, mse]:
+for err_fn in [mse, sq, cl, la]:
     cp_folder = 'cp_' + network + '_' + err_fn + '/'
     start_eval = t.perf_counter()
     print(f'starting_eval of {err_fn}')
