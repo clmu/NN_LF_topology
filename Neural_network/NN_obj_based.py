@@ -73,12 +73,12 @@ architecture = [6, 12, 12, 12, 6]'''
 
 nn_obj = NN()
 
-path_to_system_description_file = '/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/IEEE33BusDSAL.xls'
+path_to_system_description_file = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/' #'/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/IEEE33BusDSAL.xls'
+path_to_system_description_file += 'IEEE33BusDSAL.xls'
 path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
-
 network_name = 'medium' + '_'
 #network_name = 'large'
-network_loss_function = 'SquaredLineFlowLoss'
+network_loss_function = 'LineFlowLossForAngle' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
 input_data_name = network_name + 'inputs.obj'
 output_data_name = network_name + 'outputs.obj'
 cp_folder_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_' + \
