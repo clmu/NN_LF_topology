@@ -1,14 +1,16 @@
 #import tensorflow as tf
 #import numpy as np
 import time as t
+import os
 
 #from Neural_network.NN_objects import NeuralNetwork as NN
 from Neural_network.NN_objects import pickle_store_object as store
 from Neural_network.data_evaluation import evaluate_cps_obj_new
 from Neural_network.NN_objects import load_architecture
 
+proj_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
 
-path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
+path_to_data = proj_folder + '/Neural_network/'
 training_data_folder = 'datasets/'
 cp_containing_folder = 'checkpoints/'
 #network = 'small'

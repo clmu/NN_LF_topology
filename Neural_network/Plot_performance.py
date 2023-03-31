@@ -1,8 +1,11 @@
 import numpy as np
+import os
 import matplotlib.pyplot as plt
 from Neural_network.NN_objects import pickle_load_obj as load
 
-path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/'
+proj_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+
+path_to_data = proj_folder + '/Neural_network/'
 cp_folder = 'checkpoints/'
 network = 'medium'
 custom_cp_folder = 'cp_' + network + '_CustomLoss/'
