@@ -35,8 +35,8 @@ def load_loss_function(loss_fun_name, path_to_sys_file=''):
 
 def set_params_and_init_nn(model, data_in_name='', data_out_name='', pickle_load=False):
     # NN parameters
-    model.epochs = 30
-    model.batch_size = 20
+    model.epochs = 60
+    model.batch_size = 10
     model.initializer = tf.keras.initializers.glorot_uniform(seed=0)
                                             # THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
     model.init_data(data_in_name,
@@ -45,7 +45,7 @@ def set_params_and_init_nn(model, data_in_name='', data_out_name='', pickle_load
                     datapath=path_to_data,
                     scale_data_out=True,
                     pickle_load=pickle_load)
-    model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=True)
+    model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=False)
     pass
 
 '''# PATHS to containers for small network
@@ -64,23 +64,29 @@ list_of_nn_objs = [nn_regular_mse, nn_custom_loss, nn_square_loss, nn_angle_loss
 
 architecture = [6, 12, 12, 12, 6]'''
 
+proj_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir)) #cwd = current working dir, pardir = parent dir
+
 nn_obj = NN()
 
-path_to_system_description_file = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/' #'/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/IEEE33BusDSAL.xls'
+path_to_system_description_file = proj_folder + '/LF_3bus/'#'/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/' #'/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/IEEE33BusDSAL.xls'
 path_to_system_description_file += 'IEEE33BusDSAL.xls'
-path_to_data = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
+path_to_data = proj_folder + '/Neural_network/datasets/'#'/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
+#network_name = 'medium'
 network_name = 'medium'
+#network_name = 'medium_slim_learn0.5e-3'
 #network_name = 'large'
-network_loss_function = 'LineFlowLossForAngle' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
+network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
 input_data_name = network_name + '_inputs.obj'
 output_data_name = network_name + '_outputs.obj'
-cp_folder_path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/cp_' + \
-                        network_name + network_loss_function #+ '/next30'
+network_name = network_name + '_test_path_cut' #'_learn1e-4_batch10'
+cp_folder_path = proj_folder + '/Neural_network/checkpoints/cp_' + \
+                        network_name + '_' + network_loss_function + '/' #+ '/next30'
 cp_folder_and_name = cp_folder_path + '/cp_{epoch:04d}'
 arch = load_architecture(network_name)
 loss = load_loss_function(network_loss_function, path_to_sys_file=path_to_system_description_file)
 nn_obj.architecture = arch
 nn_obj.loss_fn = loss
+nn_obj.l_rate = 1e-4
 set_params_and_init_nn(nn_obj, data_in_name=input_data_name, data_out_name=output_data_name, pickle_load=True)
 
 
@@ -112,12 +118,12 @@ for model in list_of_nn_objs:
                      scale_data_out=True)
     model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True, custom_loss=False)'''
 
-text  = 'This is the testfile.'
+'''text  = 'This is the testfile.'
 
 with open(cp_folder_path + 'textfile.txt', 'w') as f:
-    f.write(text)
+    f.write(text)'''
 
-nn_obj.train_model(checkpoints=True,  cp_folder_path=cp_folder_and_name, save_freq=120*nn_obj.batch_size)
+nn_obj.train_model(checkpoints=True,  cp_folder_path=cp_folder_and_name, save_freq=480*nn_obj.batch_size)
 thresholds = [20, 10, 5, 3]
 nn_obj.model_pred()
 nn_obj.generate_performance_data_dict_improved(thresholds)

@@ -56,6 +56,7 @@ def pickle_load_obj(path='', filename=''):
     return obj
 
 def load_architecture(network_name):
+    network_name = network_name.split('_')[0]
     if network_name == 'small':
         return [6, 12, 12, 12, 6]
     elif network_name == 'medium':
@@ -234,22 +235,24 @@ class NeuralNetwork:
         cp_callback=None
 
         if epochs is None:
-            epochs=self.epochs
+            epochs = self.epochs
         if batch_size is None:
-            batch_size=self.batch_size
+            batch_size = self.batch_size
+
+        data_samples, variables = self.l_data.shape
 
         if checkpoints is True:
             if cp_folder_path is None:
                 cp_folder_path= __file__
             if save_freq is None:
-                save_freq = 1200*batch_size
+                save_freq = data_samples / batch_size #saves once per epoch
             cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=cp_folder_path,
                                                              save_weights_only=True,
                                                              verbose=1,
                                                              save_freq=save_freq)
             self.tf_model.fit(self.l_data,
                               self.l_sol,
-                              epochs=self.epochs,
+                              epochs=epochs,
                               batch_size=self.batch_size,
                               callbacks=[cp_callback],
                               #validation_data=(self.t_data, self.t_sol),
