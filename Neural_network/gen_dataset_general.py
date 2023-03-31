@@ -106,7 +106,7 @@ def gen_dataset(lf, nr_of_samples=60000, path_to_storage_folder='NO_PATH_PROVIDE
     convergence_failures = 0
     while sample < nr_of_samples:  # change to while loop to generate a fixed number of samples?
         try:
-            inputs[sample], outputs[sample] = gen_single_set(lf, p_s, q_s, low=0.8, high=1.2)
+            inputs[sample], outputs[sample] = gen_single_set(lf, p_s, q_s, low=0.9, high=1.1)
             sample += 1
         except StopIteration:
             #inputs = np.delete(inputs, sample, axis=0)ll
@@ -129,25 +129,36 @@ system_description_folder_large_sys= '/home/clemens/PycharmProjects/NN_LF_Topolo
 medium_sys_filename = 'IEEE33BusDSAL.xls'
 large_sys_filename = 'IEEE69BusDSAL.xls'
 path_storage_folder = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
-filename_medium = 'medium_dataset'
-filename_large = 'large_dataset'
+filename_medium = 'medium_slim'
+filename_large = 'large'
 
 m_dlf_buses, m_dlf_lines = BuildSystem3(system_description_folder_large_sys + medium_sys_filename)
 l_dlf_buses, l_dlf_lines = BuildSystem3(system_description_folder_large_sys + large_sys_filename)
 
 
-#solution_object = dlf(m_dlf_buses, m_dlf_lines)
-solution_object = dlf(l_dlf_buses, l_dlf_lines)
+test_system_size = 'm' #, s, m, l
+
+def set_paths_and_load_sys(size):
+    if size == 'm':
+        filename = filename_medium
+        sol_obj = dlf(m_dlf_buses, m_dlf_lines)
+    elif size == 'l':
+        filename = filename_large
+        sol_obj = dlf(l_dlf_buses, l_dlf_lines)
+    return filename, sol_obj
+
+
+filename, solution_object = set_paths_and_load_sys('m')
 
 solution_object.initialize(startBus=1)
 
 gen_dataset(solution_object,
             nr_of_samples=60000,
             path_to_storage_folder=path_storage_folder,
-            name_prefix='large')
+            name_prefix=filename)
 
-inputs = load(path=path_storage_folder, filename='large_inputs.obj')
-outputs = load(path=path_storage_folder, filename='large_outputs.obj')
+inputs = load(path=path_storage_folder, filename=filename + '_inputs.obj')
+outputs = load(path=path_storage_folder, filename=filename + '_outputs.obj')
 
 '''
 accuracy = 0.00001
