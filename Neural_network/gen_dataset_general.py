@@ -1,7 +1,7 @@
 import numpy as np
 from numpy.random import default_rng
 import time as t
-import random
+import os
 
 import matplotlib.pyplot as plt
 from LF_3bus.ElkLoadFlow import LoadFlow
@@ -125,10 +125,12 @@ def gen_dataset(lf, nr_of_samples=60000, path_to_storage_folder='NO_PATH_PROVIDE
     store(outputs, path=path_to_storage_folder, filename=name_prefix + '_outputs')
     return convergence_failures
 
-system_description_folder_large_sys= '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/' #'/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/'
+proj_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir))
+
+system_description_folder_large_sys= proj_folder + '/LF_3bus/' #'/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/'
 medium_sys_filename = 'IEEE33BusDSAL.xls'
 large_sys_filename = 'IEEE69BusDSAL.xls'
-path_storage_folder = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
+path_storage_folder = proj_folder + '/Neural_network/datasets/'
 filename_medium = 'medium_slim'
 filename_large = 'large'
 
