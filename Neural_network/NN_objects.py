@@ -245,7 +245,7 @@ class NeuralNetwork:
             if cp_folder_path is None:
                 cp_folder_path= __file__
             if save_freq is None:
-                save_freq = data_samples / batch_size #saves once per epoch
+                save_freq = 'epoch' #data_samples / batch_size #saves once per epoch, or 'epoch'
             cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=cp_folder_path,
                                                              save_weights_only=True,
                                                              verbose=1,

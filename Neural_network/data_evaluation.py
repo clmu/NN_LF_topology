@@ -152,6 +152,14 @@ def evaluate_cps_obj(cps, path_to_data='nopath', cp_folder='nofolder', architect
 
     return performance_dicts'''
 
+
+def gen_filename_ext(number):
+    number = str(number)
+    while len(number) < 4:
+        number = '0' + number
+    number = 'cp_' + number  # + '.index'
+    return number
+
 def evaluate_cps_obj_new(cps, path_to_data='nopath', cp_folder='nofolder', architecture=None, thresholds=None):
 
     '''
@@ -163,12 +171,6 @@ def evaluate_cps_obj_new(cps, path_to_data='nopath', cp_folder='nofolder', archi
     :param thresholds: list of integers. represent percentages for data evaluation.
     :return: List of performance dictionaries
     '''
-    def gen_filename_ext(number):
-        number = str(number)
-        while len(number) < 4:
-            number = '0' + number
-        number = 'cp_' + number  # + '.index'
-        return number
 
     cp_path = path_to_data + 'checkpoints/' + cp_folder
     model_numbers = np.arange(1, cps + 1)
@@ -206,3 +208,25 @@ def evaluate_cps_obj_new(cps, path_to_data='nopath', cp_folder='nofolder', archi
 
     return performance_dicts
 
+
+def eval_nn_obj_epochs(nn, thresholds=None, folder_structure={}):
+
+    '''
+    Funtion to evaluate all trained epochs of the neural network directly after training.
+    It is useful to do this directly after training because an object with this exact NN structure is present at this point.
+    :param nn: the trained neural network object.
+    :param thresholds: Threshold for NN evaluation.
+    :param folder_structure: The folder structure object of the NN objects. For ease of handling multiple files.
+    :return:
+    '''
+
+    perf_dicts = []
+    for cp_index in range(nn.epochs):
+        starttime = t.perf_counter()
+        nn.tf_model.load_weights(folder_structure['checkpoints']['model_folder_path'] + gen_filename_ext(cp_index+1))
+        nn.model_pred()
+        nn.generate_performance_data_dict_improved(thresholds)
+        perf_dicts.append(nn.performance_dict)
+        print(f'Finished epoch {cp_index + 1} in {t.perf_counter() - starttime:.2f} seconds')
+
+    return perf_dicts

@@ -8,11 +8,13 @@ Custom loss functions are found in Neural_network.custom_loss_function. if other
 """
 import os
 import tensorflow as tf
+from pathlib import Path
 from Neural_network.NN_objects import NeuralNetwork
 from Neural_network.custom_loss_function import loss_acc_for_lineflows,\
     CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
 from Neural_network.NN_objects import pickle_store_object as store
 from Neural_network.NN_objects import load_architecture
+from data_evaluation import eval_nn_obj_epochs
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' #TO SILCENCE INITIAL WARNINGS.
 
 
@@ -67,7 +69,7 @@ path_data = proj_folder + '/Neural_network/datasets/'
 
 folder_hierarchy = {}
 
-nn_obj = NeuralNetwork()
+#nn_obj = NeuralNetwork()
 
 path_to_system_description_file = proj_folder + '/LF_3bus/'#'/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/' #'/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/IEEE33BusDSAL.xls'
 sys_filename = 'IEEE33BusDSAL.xls'
@@ -76,10 +78,10 @@ path_to_cp_folder = proj_folder + '/Neural_network/checkpoints'
 dataset = '' #type slim if slim dataset is desired.
 network_name = 'medium'
 arch = load_architecture(network_name)
-remark = 'reference' # '_learn1e-4_batch10'
-nn_obj.l_rate = 1e-3
+remark = 'whack_test' # '_learn1e-4_batch10'
+l_rate = 1e-3
 batch_size = 20
-epochs = 150
+epochs = 2
 thresholds = [20, 10, 5, 3]
 network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
 loss_function_list = ['MSE', 'CustomLoss']
@@ -90,7 +92,7 @@ if dataset != '':
 input_data_name = network_name + dataset + '_inputs.obj'
 output_data_name = network_name + dataset +'_outputs.obj'
 
-nn_obj.architecture = arch
+
 folder_hierarchy['sys_descriptions'] = {}
 folder_hierarchy['checkpoints'] = {}
 
@@ -102,17 +104,34 @@ folder_hierarchy['checkpoints']['main_folder'] = path_to_cp_folder
 
 for loss_fun in loss_function_list:
 
-    cp_folder_path = path_to_cp_folder + '/cp_' + network_name + '_' + loss_fun + \
-                     '_' + remark + '/'  # + '/next30'
-    cp_folder_and_name = cp_folder_path + '/cp_{epoch:04d}'
-
     loss = load_loss_function(loss_fun, path_to_sys_file=folder_hierarchy['sys_descriptions']['system_path'])
+    nn_obj = NeuralNetwork()
+    nn_obj.l_rate = l_rate
+    nn_obj.architecture = arch
     nn_obj.loss_fn = loss
     
-    folder_hierarchy['checkpoints']['model_folder'] = path_to_cp_folder + '/' + network_name + '/' \
+    folder_hierarchy['checkpoints']['model_folder_path'] = path_to_cp_folder + '/' + network_name + '/' \
                                                       + loss_fun + '_' + remark + '/'
+    folder_hierarchy['checkpoints']['model_folder'] = network_name + '/' + loss_fun + '_' + remark + '/'
     folder_hierarchy['checkpoints']['model_storage_path'] = folder_hierarchy['checkpoints']['model_folder'] + \
                                                             'cp_{epoch:04d}'
+
+    set_params_and_init_nn(nn_obj,
+                           data_in_name=input_data_name,
+                           data_out_name=output_data_name,
+                           pickle_load=True)
+    path_to_cp = Path(folder_hierarchy['checkpoints']['model_folder_path'])
+    path_to_cp.mkdir(exist_ok=True)
+
+    nn_obj.train_model(checkpoints=True,
+                       epochs=epochs, batch_size=batch_size,
+                       cp_folder_path=folder_hierarchy['checkpoints']['model_storage_path']) #function does not seem to be able to store cps in correct folder.
+
+    epoch_performance_dictionaries = eval_nn_obj_epochs(nn_obj,
+                                                        thresholds=thresholds,
+                                                        folder_structure=folder_hierarchy)
+
+    store(epoch_performance_dictionaries, path=folder_hierarchy['checkpoints']['model_folder_path'])
 
     test = 2
 
