@@ -32,7 +32,7 @@ def load_loss_function(loss_fun_name, path_to_sys_file=''):
     elif loss_fun_name == 'LineFlowLossForAngle':
         return LineFlowLossForAngle(path=path_to_sys_file)
 
-def set_params_and_init_nn(model, data_in_name='', data_out_name='', pickle_load=False):
+def set_params_and_init_nn(model, data_in_name='', data_out_name='', pickle_load=True, mse_flag=False):
     # NN parameters
     model.initializer = tf.keras.initializers.glorot_uniform(seed=0)
                                             # THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
@@ -42,7 +42,7 @@ def set_params_and_init_nn(model, data_in_name='', data_out_name='', pickle_load
                     datapath=path_to_data,
                     scale_data_out=True,
                     pickle_load=pickle_load)
-    model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=False)
+    model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=mse_flag)
     pass
 
 '''# PATHS to containers for small network
@@ -116,10 +116,16 @@ for loss_fun in loss_function_list:
     folder_hierarchy['checkpoints']['model_storage_path'] = folder_hierarchy['checkpoints']['model_folder'] + \
                                                             'cp_{epoch:04d}'
 
+    if loss_fun == 'MSE':
+        mse = True
+    else:
+        mse = False
+
     set_params_and_init_nn(nn_obj,
                            data_in_name=input_data_name,
                            data_out_name=output_data_name,
-                           pickle_load=True)
+                           pickle_load=True,
+                           mse_flag=mse)
     path_to_cp = Path(folder_hierarchy['checkpoints']['model_folder_path'])
     path_to_cp.mkdir(exist_ok=True)
 
