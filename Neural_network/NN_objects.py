@@ -29,7 +29,7 @@ def print_weights(tf_model):
 
 def pickle_store_object(obj, path=None, filename=None):
     '''
-    function to store a (NeuralNetwork) object.
+    function to store an (NeuralNetwork) object.
     :param obj: object to be stored
     :param path: path to storage container.
     :param filename: filename without extension of file to be stored.
@@ -242,10 +242,9 @@ class NeuralNetwork:
         data_samples, variables = self.l_data.shape
 
         if checkpoints is True:
-            if cp_folder_path is None:
-                cp_folder_path= __file__
             if save_freq is None:
                 save_freq = 'epoch' #data_samples / batch_size #saves once per epoch, or 'epoch'
+
             cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=cp_folder_path,
                                                              save_weights_only=True,
                                                              verbose=1,

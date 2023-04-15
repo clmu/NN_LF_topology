@@ -42,7 +42,7 @@ def set_params_and_init_nn(model, data_in_name='', data_out_name='', pickle_load
                     datapath=path_to_data,
                     scale_data_out=True,
                     pickle_load=pickle_load)
-    model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=mse_flag)
+    model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=not mse_flag)
     pass
 
 '''# PATHS to containers for small network
@@ -75,19 +75,19 @@ path_to_system_description_file = proj_folder + '/LF_3bus/'#'/home/clemens/Pycha
 sys_filename = 'IEEE33BusDSAL.xls'
 path_to_data = proj_folder + '/Neural_network/datasets/'#'/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
 path_to_cp_folder = proj_folder + '/Neural_network/checkpoints'
-dataset = '' #type slim if slim dataset is desired.
+dataset = 'slim' #type slim if slim dataset is desired.
 network_name = 'medium'
 arch = load_architecture(network_name)
-remark = 'whack_test' # '_learn1e-4_batch10'
+remark = 'slim_30batch' # '_learn1e-4_batch10'
 l_rate = 1e-3
-batch_size = 20
-epochs = 2
+batch_size = 30
+epochs = 50
 thresholds = [20, 10, 5, 3]
 network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
 loss_function_list = ['MSE', 'CustomLoss']
 
 if dataset != '':
-    dataset = '_' + dataset + '_'
+    dataset = '_' + dataset
 
 input_data_name = network_name + dataset + '_inputs.obj'
 output_data_name = network_name + dataset +'_outputs.obj'
@@ -113,7 +113,7 @@ for loss_fun in loss_function_list:
     folder_hierarchy['checkpoints']['model_folder_path'] = path_to_cp_folder + '/' + network_name + '/' \
                                                       + loss_fun + '_' + remark + '/'
     folder_hierarchy['checkpoints']['model_folder'] = network_name + '/' + loss_fun + '_' + remark + '/'
-    folder_hierarchy['checkpoints']['model_storage_path'] = folder_hierarchy['checkpoints']['model_folder'] + \
+    folder_hierarchy['checkpoints']['model_storage_path'] = folder_hierarchy['checkpoints']['model_folder_path'] + \
                                                             'cp_{epoch:04d}'
 
     if loss_fun == 'MSE':
@@ -126,18 +126,30 @@ for loss_fun in loss_function_list:
                            data_out_name=output_data_name,
                            pickle_load=True,
                            mse_flag=mse)
+    nn_obj.epochs = epochs
+    nn_obj.batch_size = batch_size
     path_to_cp = Path(folder_hierarchy['checkpoints']['model_folder_path'])
     path_to_cp.mkdir(exist_ok=True)
 
+    '''cp_callback = tf.keras.callbacks.ModelCheckpoint(
+        filepath=folder_hierarchy['checkpoints']['model_folder'],
+        verbose=1,
+        save_weights_only=True,
+        save_freq='epoch')'''
+
     nn_obj.train_model(checkpoints=True,
-                       epochs=epochs, batch_size=batch_size,
+                       #epochs=epochs, batch_size=batch_size,
                        cp_folder_path=folder_hierarchy['checkpoints']['model_storage_path']) #function does not seem to be able to store cps in correct folder.
 
     epoch_performance_dictionaries = eval_nn_obj_epochs(nn_obj,
                                                         thresholds=thresholds,
                                                         folder_structure=folder_hierarchy)
 
-    store(epoch_performance_dictionaries, path=folder_hierarchy['checkpoints']['model_folder_path'])
+    store(epoch_performance_dictionaries,
+          path=folder_hierarchy['checkpoints']['model_folder_path'],
+          filename='perf_dict')
+
+    print(f'batch_size = {nn_obj.batch_size} \nepochs = {nn_obj.epochs} \nl_rate = {nn_obj.l_rate}')
 
     test = 2
 
