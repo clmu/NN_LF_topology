@@ -230,3 +230,18 @@ def eval_nn_obj_epochs(nn, thresholds=None, folder_structure={}):
         print(f'Finished epoch {cp_index + 1} in {t.perf_counter() - starttime:.2f} seconds')
 
     return perf_dicts
+
+
+def eval_nn_obj_epochs_list(nn_list, epochs, thresholds=None, folder_structure={}):
+
+    perf_dicts = []
+    for cp_index in range(epochs):
+        starttime = t.perf_counter()
+        nn_list[cp_index].tf_model.load_weights(folder_structure['checkpoints']['model_folder_path'] + gen_filename_ext(cp_index + 1))
+        nn_list[cp_index].model_pred()
+        nn_list[cp_index].generate_performance_data_dict_improved(thresholds)
+        perf_dicts.append(nn_list[cp_index].performance_dict)
+        print(f'Finished epoch {cp_index + 1} in {t.perf_counter() - starttime:.2f} seconds')
+
+    return perf_dicts
+

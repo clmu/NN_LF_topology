@@ -14,7 +14,7 @@ from Neural_network.custom_loss_function import loss_acc_for_lineflows,\
     CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
 from Neural_network.NN_objects import pickle_store_object as store
 from Neural_network.NN_objects import load_architecture
-from data_evaluation import eval_nn_obj_epochs
+from data_evaluation import eval_nn_obj_epochs, eval_nn_obj_epochs_list
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' #TO SILCENCE INITIAL WARNINGS.
 
 
@@ -78,9 +78,9 @@ path_to_cp_folder = proj_folder + '/Neural_network/checkpoints'
 dataset = 'slim' #type slim if slim dataset is desired.
 network_name = 'medium'
 arch = load_architecture(network_name)
-remark = 'slim_30batch' # '_learn1e-4_batch10'
+remark = 'slim_deep' # '_learn1e-4_batch10'
 l_rate = 1e-3
-batch_size = 30
+batch_size = 20
 epochs = 50
 thresholds = [20, 10, 5, 3]
 network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
@@ -146,10 +146,30 @@ for loss_fun in loss_function_list:
     epoch_performance_dictionaries = eval_nn_obj_epochs(nn_obj,
                                                         thresholds=thresholds,
                                                         folder_structure=folder_hierarchy)
-
     store(epoch_performance_dictionaries,
           path=folder_hierarchy['checkpoints']['model_folder_path'],
           filename='perf_dict')
+
+    untrained_nn_list = []
+    for epoch in range(nn_obj.epochs):
+        nn_model = NeuralNetwork()
+        set_params_and_init_nn(nn_model,
+                               data_in_name=input_data_name,
+                               data_out_name=output_data_name,
+                               pickle_load=True)
+        untrained_nn_list.append(nn_model)
+
+
+
+    epoch_performance_dictionaries_from_list = eval_nn_obj_epochs_list(untrained_nn_list,
+                                                                       epochs,
+                                                                       thresholds=thresholds,
+                                                                       folder_structure=folder_hierarchy)
+    store(epoch_performance_dictionaries_from_list,
+          path=folder_hierarchy['checkpoints']['model_folder_path'],
+          filename='perf_dict_from_list')
+
+
 
     print(f'batch_size = {nn_obj.batch_size} \nepochs = {nn_obj.epochs} \nl_rate = {nn_obj.l_rate}')
 
