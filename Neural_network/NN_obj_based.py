@@ -107,7 +107,9 @@ for loss_fun in loss_function_list:
     loss = load_loss_function(loss_fun, path_to_sys_file=folder_hierarchy['sys_descriptions']['system_path'])
     nn_obj = NeuralNetwork()
     nn_obj.l_rate = l_rate
+    arch = [64, 128, 128, 128, 128, 64] # adding additional layer of neurons
     nn_obj.architecture = arch
+    print(f'nn_obj arch: {nn_obj.architecture}')
     nn_obj.loss_fn = loss
     
     folder_hierarchy['checkpoints']['model_folder_path'] = path_to_cp_folder + '/' + network_name + '/' \
