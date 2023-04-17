@@ -78,13 +78,13 @@ path_to_cp_folder = proj_folder + '/Neural_network/checkpoints'
 dataset = 'slim' #type slim if slim dataset is desired.
 network_name = 'medium'
 arch = load_architecture(network_name)
-remark = 'slim_deep' # '_learn1e-4_batch10'
-l_rate = 1e-3
+remark = 'slim_deeper_low_lrate' # '_learn1e-4_batch10'
+l_rate = 1e-4
 batch_size = 20
-epochs = 50
+epochs = 100
 thresholds = [20, 10, 5, 3]
 network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
-loss_function_list = ['MSE', 'CustomLoss']
+loss_function_list = ['MSE']#, 'CustomLoss']
 
 if dataset != '':
     dataset = '_' + dataset
@@ -107,7 +107,7 @@ for loss_fun in loss_function_list:
     loss = load_loss_function(loss_fun, path_to_sys_file=folder_hierarchy['sys_descriptions']['system_path'])
     nn_obj = NeuralNetwork()
     nn_obj.l_rate = l_rate
-    arch = [64, 128, 128, 128, 128, 64] # adding additional layer of neurons
+    arch = [64, 128, 128, 128, 128, 128, 64] # adding additional layer of neurons
     nn_obj.architecture = arch
     print(f'nn_obj arch: {nn_obj.architecture}')
     nn_obj.loss_fn = loss
@@ -133,11 +133,11 @@ for loss_fun in loss_function_list:
     path_to_cp = Path(folder_hierarchy['checkpoints']['model_folder_path'])
     path_to_cp.mkdir(exist_ok=True)
 
-    '''cp_callback = tf.keras.callbacks.ModelCheckpoint(
+    cp_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=folder_hierarchy['checkpoints']['model_folder'],
         verbose=1,
         save_weights_only=True,
-        save_freq='epoch')'''
+        save_freq='epoch')
 
     nn_obj.train_model(checkpoints=True,
                        #epochs=epochs, batch_size=batch_size,
@@ -153,13 +153,12 @@ for loss_fun in loss_function_list:
     untrained_nn_list = []
     for epoch in range(nn_obj.epochs):
         nn_model = NeuralNetwork()
+        nn_model.architecture = arch
         set_params_and_init_nn(nn_model,
                                data_in_name=input_data_name,
                                data_out_name=output_data_name,
                                pickle_load=True)
         untrained_nn_list.append(nn_model)
-
-
 
     epoch_performance_dictionaries_from_list = eval_nn_obj_epochs_list(untrained_nn_list,
                                                                        epochs,
