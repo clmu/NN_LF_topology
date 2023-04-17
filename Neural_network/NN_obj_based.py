@@ -84,7 +84,7 @@ batch_size = 20
 epochs = 100
 thresholds = [20, 10, 5, 3]
 network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
-loss_function_list = ['MSE']#, 'CustomLoss']
+loss_function_list = ['CustomLoss']
 
 if dataset != '':
     dataset = '_' + dataset
@@ -143,12 +143,13 @@ for loss_fun in loss_function_list:
                        #epochs=epochs, batch_size=batch_size,
                        cp_folder_path=folder_hierarchy['checkpoints']['model_storage_path']) #function does not seem to be able to store cps in correct folder.
 
+    '''
     epoch_performance_dictionaries = eval_nn_obj_epochs(nn_obj,
                                                         thresholds=thresholds,
                                                         folder_structure=folder_hierarchy)
     store(epoch_performance_dictionaries,
           path=folder_hierarchy['checkpoints']['model_folder_path'],
-          filename='perf_dict')
+          filename='perf_dict')'''
 
     untrained_nn_list = []
     for epoch in range(nn_obj.epochs):
