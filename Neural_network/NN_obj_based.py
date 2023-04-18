@@ -64,7 +64,7 @@ architecture = [6, 12, 12, 12, 6]'''
 
 
 proj_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir)) #cwd = current working dir, pardir = parent dir
-path_sys_file = proj_folder + '/LF_3bus' + '/IEEE33BusDSAL.xls'
+path_sys_file = proj_folder + '/LF_3bus' + '/IEEE69BusDSAL.xls'
 path_data = proj_folder + '/Neural_network/datasets/'
 
 folder_hierarchy = {}
@@ -72,19 +72,19 @@ folder_hierarchy = {}
 #nn_obj = NeuralNetwork()
 
 path_to_system_description_file = proj_folder + '/LF_3bus/'#'/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/' #'/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/IEEE33BusDSAL.xls'
-sys_filename = 'IEEE33BusDSAL.xls'
+sys_filename = 'IEEE69BusDSAL.xls'
 path_to_data = proj_folder + '/Neural_network/datasets/'#'/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
 path_to_cp_folder = proj_folder + '/Neural_network/checkpoints'
 dataset = 'slim' #type slim if slim dataset is desired.
-network_name = 'medium'
+network_name = 'large'
 arch = load_architecture(network_name)
-remark = 'slim_deeper_low_lrate' # '_learn1e-4_batch10'
-l_rate = 1e-4
+remark = 'baseline' # '_learn1e-4_batch10'
+l_rate = 1e-3
 batch_size = 20
-epochs = 100
+epochs = 50
 thresholds = [20, 10, 5, 3]
 network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
-loss_function_list = ['CustomLoss']
+loss_function_list = ['MSE', 'CustomLoss']
 
 if dataset != '':
     dataset = '_' + dataset
@@ -107,9 +107,10 @@ for loss_fun in loss_function_list:
     loss = load_loss_function(loss_fun, path_to_sys_file=folder_hierarchy['sys_descriptions']['system_path'])
     nn_obj = NeuralNetwork()
     nn_obj.l_rate = l_rate
-    arch = [64, 128, 128, 128, 128, 128, 64] # adding additional layer of neurons
+    #arch = [64, 128, 128, 128, 128, 128, 64] # adding additional layer of neurons
     nn_obj.architecture = arch
-    print(f'nn_obj arch: {nn_obj.architecture}')
+
+    #print(f'nn_obj arch: {nn_obj.architecture}')
     nn_obj.loss_fn = loss
     
     folder_hierarchy['checkpoints']['model_folder_path'] = path_to_cp_folder + '/' + network_name + '/' \
@@ -132,6 +133,8 @@ for loss_fun in loss_function_list:
     nn_obj.batch_size = batch_size
     path_to_cp = Path(folder_hierarchy['checkpoints']['model_folder_path'])
     path_to_cp.mkdir(exist_ok=True)
+
+    nn_obj.tf_model.summary()
 
     cp_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=folder_hierarchy['checkpoints']['model_folder'],

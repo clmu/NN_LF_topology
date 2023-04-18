@@ -132,13 +132,13 @@ medium_sys_filename = 'IEEE33BusDSAL.xls'
 large_sys_filename = 'IEEE69BusDSAL.xls'
 path_storage_folder = proj_folder + '/Neural_network/datasets/'
 filename_medium = 'medium_slim'
-filename_large = 'large'
+filename_large = 'large_slim'
 
 m_dlf_buses, m_dlf_lines = BuildSystem3(system_description_folder_large_sys + medium_sys_filename)
 l_dlf_buses, l_dlf_lines = BuildSystem3(system_description_folder_large_sys + large_sys_filename)
 
 
-test_system_size = 'm' #, s, m, l
+test_system_size = 'l' #, s, m, l
 
 def set_paths_and_load_sys(size):
     if size == 'm':
@@ -150,7 +150,7 @@ def set_paths_and_load_sys(size):
     return filename, sol_obj
 
 
-filename, solution_object = set_paths_and_load_sys('m')
+filename, solution_object = set_paths_and_load_sys('l')
 
 solution_object.initialize(startBus=1)
 
