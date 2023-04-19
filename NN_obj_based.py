@@ -14,7 +14,7 @@ from Neural_network.custom_loss_function import loss_acc_for_lineflows,\
     CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
 from Neural_network.NN_objects import pickle_store_object as store
 from Neural_network.NN_objects import load_architecture
-from data_evaluation import eval_nn_obj_epochs, eval_nn_obj_epochs_list
+from Neural_network.data_evaluation import eval_nn_obj_epochs, eval_nn_obj_epochs_list
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' #TO SILCENCE INITIAL WARNINGS.
 
 
@@ -32,14 +32,14 @@ def load_loss_function(loss_fun_name, path_to_sys_file=''):
     elif loss_fun_name == 'LineFlowLossForAngle':
         return LineFlowLossForAngle(path=path_to_sys_file)
 
-def set_params_and_init_nn(model, data_in_name='', data_out_name='', pickle_load=True, mse_flag=False):
+def set_params_and_init_nn(model, data_in_name='', data_out_name='', path='NONE', pickle_load=True, mse_flag=False):
     # NN parameters
     model.initializer = tf.keras.initializers.glorot_uniform(seed=0)
                                             # THIS IS THE SAME AS USED IN NON OBJ BASED APPROACH.
     model.init_data(data_in_name,
                     data_out_name,
                     0.2,
-                    datapath=path_to_data,
+                    datapath=path,
                     scale_data_out=True,
                     pickle_load=pickle_load)
     model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=not mse_flag)
@@ -63,7 +63,8 @@ architecture = [6, 12, 12, 12, 6]'''
 
 
 
-proj_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir)) #cwd = current working dir, pardir = parent dir
+#proj_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir)) #cwd = current working dir, pardir = parent dir
+proj_folder = os.getcwd()
 path_sys_file = proj_folder + '/LF_3bus' + '/IEEE69BusDSAL.xls'
 path_data = proj_folder + '/Neural_network/datasets/'
 
@@ -78,10 +79,10 @@ path_to_cp_folder = proj_folder + '/Neural_network/checkpoints'
 dataset = 'slim' #type slim if slim dataset is desired.
 network_name = 'large'
 arch = load_architecture(network_name)
-remark = 'baseline' # '_learn1e-4_batch10'
+remark = 'IDUN_test' # '_learn1e-4_batch10'
 l_rate = 1e-3
 batch_size = 20
-epochs = 50
+epochs = 20
 thresholds = [20, 10, 5, 3]
 network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
 loss_function_list = ['MSE', 'CustomLoss']
@@ -127,6 +128,7 @@ for loss_fun in loss_function_list:
     set_params_and_init_nn(nn_obj,
                            data_in_name=input_data_name,
                            data_out_name=output_data_name,
+                           path=path_to_data,
                            pickle_load=True,
                            mse_flag=mse)
     nn_obj.epochs = epochs
