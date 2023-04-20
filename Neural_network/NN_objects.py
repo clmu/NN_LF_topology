@@ -255,7 +255,7 @@ class NeuralNetwork:
                               batch_size=self.batch_size,
                               callbacks=[cp_callback],
                               #validation_data=(self.t_data, self.t_sol),
-                              verbose=1
+                              verbose=2
                               )
         else:
             self.tf_model.fit(self.l_data,
@@ -263,7 +263,7 @@ class NeuralNetwork:
                               epochs=self.epochs,
                               batch_size=self.batch_size,
                               #validation_data=(self.t_data, self.t_sol),
-                              verbose=1
+                              verbose=2
                               )
         pass
 

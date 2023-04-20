@@ -17,7 +17,14 @@ from Neural_network.NN_objects import load_architecture
 from Neural_network.data_evaluation import eval_nn_obj_epochs, eval_nn_obj_epochs_list
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' #TO SILCENCE INITIAL WARNINGS.
 
+'''
+#multithreading CPU
+threads = '48' #cores at specific idun node
 
+os.environ['MKL_NUM_THREADS'] = threads
+os.environ['GOTO_NUM_THREADS'] = threads
+os.environ['OMP_NUM_THREADS'] = threads
+os.environ['openmp'] = 'True' '''
 
 
 def load_loss_function(loss_fun_name, path_to_sys_file=''):
@@ -163,6 +170,7 @@ for loss_fun in loss_function_list:
         set_params_and_init_nn(nn_model,
                                data_in_name=input_data_name,
                                data_out_name=output_data_name,
+                               path=path_to_data,
                                pickle_load=True)
         untrained_nn_list.append(nn_model)
 
