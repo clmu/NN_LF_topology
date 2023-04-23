@@ -73,26 +73,24 @@ architecture = [6, 12, 12, 12, 6]'''
 #proj_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir)) #cwd = current working dir, pardir = parent dir
 proj_folder = os.getcwd()
 path_sys_file = proj_folder + '/LF_3bus' + '/IEEE69BusDSAL.xls'
-path_data = proj_folder + '/Neural_network/datasets/'
-
-folder_hierarchy = {}
-
-#nn_obj = NeuralNetwork()
-
+path_data = proj_folder + '/datasets/'
 path_to_system_description_file = proj_folder + '/LF_3bus/'#'/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/' #'/home/clemens/Dropbox/EMIL_MIENERG21/Master/IEEE33bus_69bus/IEEE33BusDSAL.xls'
 sys_filename = 'IEEE69BusDSAL.xls'
-path_to_data = proj_folder + '/Neural_network/datasets/'#'/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
-path_to_cp_folder = proj_folder + '/Neural_network/checkpoints'
+path_to_data = proj_folder + '/datasets/'#'/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/datasets/'
+path_to_cp_folder = proj_folder + '/checkpoints'
+folder_hierarchy = {}
+
+'''Selecting network size and Hyperparameters'''
 dataset = 'slim' #type slim if slim dataset is desired.
-network_name = 'large'
+network_name = 'medium'
 arch = load_architecture(network_name)
-remark = 'IDUN_test' # '_learn1e-4_batch10'
-l_rate = 1e-3
-batch_size = 20
-epochs = 20
+remark = 'random_batch_learn_1e-4' # '_learn1e-4_batch10'
+l_rate = 1e-4
+batch_size = 50
+epochs = 150
 thresholds = [20, 10, 5, 3]
-network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
-loss_function_list = ['MSE', 'CustomLoss']
+#network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
+loss_function_list = ['MSE']#, 'CustomLoss']
 
 if dataset != '':
     dataset = '_' + dataset
