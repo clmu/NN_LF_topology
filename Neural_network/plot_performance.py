@@ -3,10 +3,10 @@ import numpy as np
 from Neural_network.NN_objects import pickle_load_obj as load
 
 path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/'
-network_size = 'medium'
-remark = '200batch_learn_1e-4'
+network_size = 'large'
+remark = 'large_30batch'
 
-loss_fun_list = ['MSE']#['MSE' , 'CustomLoss']
+loss_fun_list = ['MSE', 'CustomLoss', 'SquaredLineFlowLoss']#['MSE']#['MSE' , 'CustomLoss']
 performance_data = {}
 
 for loss in loss_fun_list:
@@ -15,9 +15,16 @@ for loss in loss_fun_list:
 
 epochs = len(performance_data[loss_fun_list[0]])
 epoch_vec = np.arange(1, epochs+1)
-averages = [[], []]
-v_avg = [[], []]
-a_avg = [[], []]
+
+averages, v_avg, a_avg = [], [], []
+
+for loss in range(len(loss_fun_list)):
+    averages.append([])
+    v_avg.append([])
+    a_avg.append([])
+#averages = [[], [], []]
+#v_avg = [[], [], []]
+#a_avg = [[], [], []]
 
 for epoch in range(epochs):
     for loss_idx in range(len(loss_fun_list)):
@@ -32,9 +39,13 @@ def inches(cm):
 fig_savepath = '/home/clemens/Dropbox/EMIL_MIENERG21/Master/Master/Figures/Results/'
 
 ylim = [0, 10]
+color_list = ['red', 'blue', 'green', 'purple']
 
-plt.plot(epoch_vec, averages[0], label=loss_fun_list[0], color='red')
+for loss_idx in range(len(loss_fun_list)):
+    plt.plot(epoch_vec, averages[loss_idx], label=loss_fun_list[loss_idx], color=color_list[loss_idx])
+#plt.plot(epoch_vec, averages[0], label=loss_fun_list[0], color='red')
 #plt.plot(epoch_vec, averages[1], label=loss_fun_list[1], color='blue')
+#plt.plot(epoch_vec, averages[2], label=loss_fun_list[2], color='green')
 plt.xlabel('Epoch number')
 plt.ylabel('Average percentage accuracy')
 #plt.gca().set_ylim(ylim)
