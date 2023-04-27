@@ -2,17 +2,53 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from Neural_network.NN_objects import pickle_load_obj as load
+from tabulate import tabulate
+
+
+def print_performance(performance_dict, loss_function_list, size, remark):
+    thresholds = ['20percent', '10percent', '5percent', '3percent']
+    print(f'------------     Performance {size}_{remark}   ----------------')
+    data = {}
+    table1 = [['', 'Overall errors', 'V mag error', 'V ang error']]
+    table2 = [['Threshold']]
+    len_loss_fun = len(loss_fun_list)
+    for loss in loss_function_list:
+        table2[0].append(loss)
+        data[loss] = {}
+        final_perf_dict = performance_dict[loss][-1]
+        data[loss]['avg'] = np.round(final_perf_dict['overall_average'], decimals=2)
+        data[loss]['v_avg'] = np.round(final_perf_dict['average_voltage'], decimals=2)
+        data[loss]['a_avg'] = np.round(final_perf_dict['average_angle'], decimals=2)
+        for threshold in thresholds:
+            data[loss][threshold] = np.round(final_perf_dict[threshold]['sets_worse_than_threshold'], decimals=1)
+
+    for threshold in thresholds:
+        row = [threshold]
+        for i in range(len_loss_fun):
+            loss2 = loss_function_list[i]
+            row.append(data[loss2][threshold])
+        table2.append(row)
+
+    for loss in loss_fun_list:
+        table1.append([loss, data[loss]['avg'], data[loss]['v_avg'], data[loss]['avg']])
+
+    print(f'\n{tabulate(table1)}\n')
+    print(tabulate(table2))
+
+    pass
+
 
 cwd = os.getcwd()
 path = cwd + '/checkpoints/'
-network_size = 'large'
-remark = 'large_30batch'#'baseline_slim'#
+network_size = 'medium'
+remark = 'slim_deeper_low_lrate'#'baseline_slim'#
 
-loss_fun_list = ['MSE', 'CustomLoss', 'SquaredLineFlowLoss']#['MSE']#['MSE' , 'CustomLoss']
+loss_fun_list = ['MSE', 'CustomLoss']#, 'SquaredLineFlowLoss']#['MSE']#['MSE' , 'CustomLoss']
 performance_data = {}
 
 print(f'Generating performance plot for {network_size} NN, using {remark}')
 print(f'Losses to plot: {loss_fun_list}')
+print(f'cwd: {cwd}')
 
 for loss in loss_fun_list:
     datapath = path + network_size + '/' + loss + '_' + remark + '/'
@@ -61,7 +97,10 @@ plt.xticks()
 plt.legend()
 plt.grid()
 plt.gcf().set_size_inches(inches(16), inches(10))
-plt.savefig(path + 'pinn_' + network_size + '_' + remark, dpi=600)
+plt.show()
+#plt.savefig(fig_savepath + 'pinn_' + network_size + '_' + remark, dpi=600)
+
+print_performance(performance_data, loss_fun_list, network_size, remark)
 
 '''
 fig, ax = plt.subplots()
