@@ -3,7 +3,7 @@ import time
 
 import tensorflow as tf
 import numpy as np
-import pickle
+import _pickle as pickle
 from keras import layers
 from LF_3bus.build_sys_from_sheet import BuildSystem
 from LF_3bus.ElkLoadFlow import LoadFlow
