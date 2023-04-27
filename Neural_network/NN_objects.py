@@ -342,9 +342,9 @@ class NeuralNetwork:
         #threshold_independent_metrics
 
         self.performance_dict['averages'] = np.average(self.abs_percentage_pred_errors, axis=0)
-        self.performance_dict['overall_average'] = np.average(self.performance_dict['averages'])
-        self.performance_dict['average_angle'] = np.average(self.performance_dict['averages'][self.load_buses:])
-        self.performance_dict['average_voltage'] = np.average(self.performance_dict['averages'][:self.load_buses])
+        self.performance_dict['overall_average'] = round(np.average(self.performance_dict['averages']), 2)
+        self.performance_dict['average_angle'] = round(np.average(self.performance_dict['averages'][self.load_buses:]), 2)
+        self.performance_dict['average_voltage'] = round(np.average(self.performance_dict['averages'][:self.load_buses]), 2)
 
         #threshold_dependent_metrics
         for threshold_number in threshold:
@@ -354,7 +354,7 @@ class NeuralNetwork:
                                                             self.abs_percentage_pred_errors > threshold_number)
             affected_sets = find_affected_sets(threshold_key)
             self.performance_dict[threshold_key]['sets_with_pred_error_over_threshold'] = affected_sets
-            self.performance_dict[threshold_key]['sets_worse_than_threshold'] = affected_sets / self.t_sol.shape[0] * 100
+            self.performance_dict[threshold_key]['sets_worse_than_threshold'] = round(affected_sets / self.t_sol.shape[0] * 100, 1)
 
         pass
 
