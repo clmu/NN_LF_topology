@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 from Neural_network.NN_objects import pickle_load_obj as load
 
-path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/'
+cwd = os.getcwd()
+path = cwd + '/checkpoints/'
 network_size = 'large'
-remark = 'baseline_slim'#'large_30batch'
+remark = 'large_30batch'#'baseline_slim'#
 
 loss_fun_list = ['MSE', 'CustomLoss', 'SquaredLineFlowLoss']#['MSE']#['MSE' , 'CustomLoss']
 performance_data = {}
@@ -39,6 +41,7 @@ for epoch in range(epochs):
 def inches(cm):
     return cm/2.54
 
+# To save in proj folder.
 fig_savepath = '/home/clemens/Dropbox/EMIL_MIENERG21/Master/Master/Figures/Results/'
 
 ylim = [0, 10]
@@ -58,7 +61,7 @@ plt.xticks()
 plt.legend()
 plt.grid()
 plt.gcf().set_size_inches(inches(16), inches(10))
-plt.savefig(fig_savepath + 'pinn_' + network_size + '_' + remark, dpi=600)
+plt.savefig(path + 'pinn_' + network_size + '_' + remark, dpi=600)
 
 '''
 fig, ax = plt.subplots()
