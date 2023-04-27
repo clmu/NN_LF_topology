@@ -4,10 +4,13 @@ from Neural_network.NN_objects import pickle_load_obj as load
 
 path = '/home/clemens/PycharmProjects/NN_LF_Topology/Neural_network/checkpoints/'
 network_size = 'large'
-remark = 'large_30batch'
+remark = 'baseline_slim'#'large_30batch'
 
 loss_fun_list = ['MSE', 'CustomLoss', 'SquaredLineFlowLoss']#['MSE']#['MSE' , 'CustomLoss']
 performance_data = {}
+
+print(f'Generating performance plot for {network_size} NN, using {remark}')
+print(f'Losses to plot: {loss_fun_list}')
 
 for loss in loss_fun_list:
     datapath = path + network_size + '/' + loss + '_' + remark + '/'
