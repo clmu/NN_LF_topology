@@ -41,10 +41,10 @@ def print_performance(performance_dict, loss_function_list, size, remark):
 cwd = os.getcwd()
 path = cwd + '/checkpoints/'
 network_size = 'large'
-remark = 'baseline_slim'
+remark = 'large_30batch'
 #remark = 'baseline_slim''large_30batch' 'large_deep' 'large_low_lrate' #large_wide_baseline'
 
-loss_fun_list = ['MSE', 'CustomLoss']#, 'SquaredLineFlowLoss']#['MSE']#['MSE' , 'CustomLoss']
+loss_fun_list = ['MSE', 'CustomLoss', 'SquaredLineFlowLoss']#['MSE']#['MSE' , 'CustomLoss']
 performance_data = {}
 
 print(f'Generating performance plot for {network_size} NN, using {remark}')

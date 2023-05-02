@@ -82,11 +82,11 @@ folder_hierarchy = {}
 
 '''Selecting network size and Hyperparameters'''
 dataset = 'slim' #type slim if slim dataset is desired.
-network_name = 'medium'
+network_name = 'large'
 arch = load_architecture(network_name)
-remark = 'random_batch_learn_1e-4' # '_learn1e-4_batch10'
+remark = 'baseline_slim' # '_learn1e-4_batch10'
 l_rate = 1e-4
-batch_size = 50
+batch_size = 20
 epochs = 150
 thresholds = [20, 10, 5, 3]
 #network_loss_function = 'MSE' #CustomLoss, SquaredLineFlowLoss, LineFlowLossForAngle
@@ -142,7 +142,7 @@ for loss_fun in loss_function_list:
     path_to_cp.mkdir(exist_ok=True)
 
     nn_obj.tf_model.summary()
-
+    
     cp_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=folder_hierarchy['checkpoints']['model_folder'],
         verbose=1,
@@ -180,7 +180,7 @@ for loss_fun in loss_function_list:
           path=folder_hierarchy['checkpoints']['model_folder_path'],
           filename='perf_dict_from_list')
 
-
+    del untrained_nn_list, epoch_performance_dictionaries_from_list
 
     print(f'batch_size = {nn_obj.batch_size} \nepochs = {nn_obj.epochs} \nl_rate = {nn_obj.l_rate}')
 
