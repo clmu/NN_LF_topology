@@ -1,6 +1,7 @@
 @Autor: Clemens Müller
 
-Code repository for the work on my masters project: "TITLE", supervised by: Olav B. Fosso
+Code repository for the work on my masters project at NTNU: "TITLE", supervised by: Olav B. Fosso
+
 Goal: Implement a physics informed neural network to solve power flows in distribution grids.
 
 The "main" file in this code repository is the NN_obj_based. Network size and hyperparameters are selected just below line 83.
@@ -15,3 +16,4 @@ Note that the custom loss functions depend on the Y-bus matrix generated using t
 
 Datasets used for training have been generated using both the LF_3bus and PyDSAL module.
 
+All checkpoints for neural networks trained during the work on this thesis should still be available. Please contact my supervisor should they be of interest.

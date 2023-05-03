@@ -1,4 +1,5 @@
 """
+This script is now obsolete, it is replaced by NN_function.py
 
 This is the master script for training and evaluating a neural network from the object oriented approach.
 
