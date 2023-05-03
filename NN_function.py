@@ -82,7 +82,7 @@ loss_function_list = ['MSE']#, 'CustomLoss']
 sys_filename = 'IEEE69BusDSAL.xls'''
 
 
-def gen_eval_model_with_hyperparams(dataset='slim',
+def NN_obj_based(dataset='slim',
                                     network_name='none',
                                     arch=None,
                                     remark='none',
