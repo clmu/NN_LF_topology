@@ -30,7 +30,7 @@ def print_performance(performance_dict, loss_function_list, size, remark):
         table2.append(row)
 
     for loss in loss_fun_list:
-        table1.append([loss, data[loss]['avg'], data[loss]['v_avg'], data[loss]['avg']])
+        table1.append([loss, data[loss]['avg'], data[loss]['v_avg'], data[loss]['a_avg']])
 
     print(f'\n{tabulate(table1)}\n')
     print(tabulate(table2))
@@ -39,9 +39,9 @@ def print_performance(performance_dict, loss_function_list, size, remark):
 
 
 cwd = os.getcwd()
-path = cwd + '/checkpoints/'
-network_size = 'large'
-remark = 'large_30batch'
+path = cwd + '/Neural_network/checkpoints/'
+network_size = 'medium'
+remark = 'slim_30batch'
 #remark = 'baseline_slim''large_30batch' 'large_deep' 'large_low_lrate' #large_wide_baseline'
 
 loss_fun_list = ['MSE', 'CustomLoss', 'SquaredLineFlowLoss']#['MSE']#['MSE' , 'CustomLoss']
@@ -81,7 +81,7 @@ def inches(cm):
 # To save in proj folder.
 fig_savepath = '/home/clemens/Dropbox/EMIL_MIENERG21/Master/Master/Figures/Results/'
 
-ylim = [0, 10]
+ylim = [0, 11]
 color_list = ['red', 'blue', 'green', 'purple']
 
 for loss_idx in range(len(loss_fun_list)):
@@ -93,13 +93,13 @@ plt.xlabel('Epoch number')
 plt.ylabel('Average percentage accuracy')
 #plt.gca().set_ylim(ylim)
 plt.xticks(np.arange(min(epoch_vec)-1, max(epoch_vec)-1, 5))
-#plt.yticks(np.arange(min(ylim), max(ylim)+1, 0.5))
+plt.yticks(np.arange(min(ylim), max(ylim)+1, 1))
 plt.xticks()
 plt.legend()
 plt.grid()
 plt.gcf().set_size_inches(inches(16), inches(10))
-plt.show()
-#plt.savefig(fig_savepath + 'pinn_' + network_size + '_' + remark, dpi=600)
+#plt.show()
+plt.savefig(fig_savepath + 'pinn_' + network_size + '_' + remark, dpi=600)
 
 print_performance(performance_data, loss_fun_list, network_size, remark)
 
