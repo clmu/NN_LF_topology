@@ -41,7 +41,7 @@ def print_performance(performance_dict, loss_function_list, size, remark):
 cwd = os.getcwd()
 path = cwd + '/Neural_network/checkpoints/'
 network_size = 'medium'
-remark = 'slim_30batch'
+remark = 'slim_deeper_low_lrate'
 #remark = 'baseline_slim''large_30batch' 'large_deep' 'large_low_lrate' #large_wide_baseline'
 
 loss_fun_list = ['MSE', 'CustomLoss', 'SquaredLineFlowLoss']#['MSE']#['MSE' , 'CustomLoss']

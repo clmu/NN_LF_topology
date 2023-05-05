@@ -83,15 +83,16 @@ sys_filename = 'IEEE69BusDSAL.xls'''
 
 
 def NN_obj_based(dataset='slim',
-                                    network_name='none',
-                                    arch=None,
-                                    remark='none',
-                                    l_rate=None,
-                                    batch_size=None,
-                                    epochs=None,
-                                    thresholds=[20, 10, 5, 3],
-                                    loss_function_list=[None],
-                                    sys_filename='IEEE33BusDSAL.xls'):
+                 network_name='none',
+                 arch=None,
+                 remark='none',
+                 l_rate=None,
+                 batch_size=None,
+                 epochs=None,
+                 thresholds=[20, 10, 5, 3],
+                 loss_function_list=[None],
+                 sys_filename='IEEE33BusDSAL.xls',
+                 train_model=True):
     if arch is None:
         arch=load_architecture(network_name)
 
@@ -156,15 +157,15 @@ def NN_obj_based(dataset='slim',
 
         nn_obj.tf_model.summary()
 
-        cp_callback = tf.keras.callbacks.ModelCheckpoint(
+        '''cp_callback = tf.keras.callbacks.ModelCheckpoint(
             filepath=folder_hierarchy['checkpoints']['model_folder'],
             verbose=1,
             save_weights_only=True,
-            save_freq='epoch')
-
-        nn_obj.train_model(checkpoints=True,
-                           #epochs=epochs, batch_size=batch_size,
-                           cp_folder_path=folder_hierarchy['checkpoints']['model_storage_path']) #function does not seem to be able to store cps in correct folder.
+            save_freq='epoch')'''
+        if train_model:
+            nn_obj.train_model(checkpoints=True,
+                                #epochs=epochs, batch_size=batch_size,
+                                cp_folder_path=folder_hierarchy['checkpoints']['model_storage_path']) #function does not seem to be able to store cps in correct folder.
 
         '''
         epoch_performance_dictionaries = eval_nn_obj_epochs(nn_obj,
@@ -198,6 +199,18 @@ def NN_obj_based(dataset='slim',
         print(f'batch_size = {nn_obj.batch_size} \nepochs = {nn_obj.epochs} \nl_rate = {nn_obj.l_rate}')
 
         test = 2
+
+NN_obj_based(dataset='slim',
+             network_name='medium',
+             arch=None,
+             remark='whack_test',
+             l_rate=None,
+             batch_size=None,
+             epochs=1,
+             thresholds=[20, 10, 5, 3],
+             loss_function_list=['MSE', 'CustomLoss', 'SquaredLineFlowLoss'],
+             sys_filename='IEEE33BusDSAL.xls',
+             train_model=True)
 
 
 '''set_params_and_init_nn(nn_obj, data_in_name=input_data_name, data_out_name=output_data_name, pickle_load=True)
