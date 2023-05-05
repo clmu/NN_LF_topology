@@ -185,7 +185,7 @@ def NN_obj_based(dataset='slim',
                                    path=path_to_data,
                                    pickle_load=True)
             untrained_nn_list.append(nn_model)
-
+        print(f'Starting eval of {network_name}_{loss_fun}')
         epoch_performance_dictionaries_from_list = eval_nn_obj_epochs_list(untrained_nn_list,
                                                                            epochs,
                                                                            thresholds=thresholds,
@@ -203,14 +203,14 @@ def NN_obj_based(dataset='slim',
 NN_obj_based(dataset='slim',
              network_name='medium',
              arch=None,
-             remark='whack_test',
+             remark='slim_low_lrate',
              l_rate=None,
              batch_size=None,
-             epochs=1,
+             epochs=90,
              thresholds=[20, 10, 5, 3],
              loss_function_list=['MSE', 'CustomLoss', 'SquaredLineFlowLoss'],
              sys_filename='IEEE33BusDSAL.xls',
-             train_model=True)
+             train_model=False)
 
 
 '''set_params_and_init_nn(nn_obj, data_in_name=input_data_name, data_out_name=output_data_name, pickle_load=True)
