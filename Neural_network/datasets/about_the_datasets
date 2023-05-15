@@ -6,4 +6,4 @@ for both the medium and large test networks, there exist two datasets. One train
 varied within the interval [0.9, 1.1] and one for the wide load interval [0.8, 1.2]. The wide datasets to not state
 dataset width in the filename.
 
-Note that the small datasets are stored using a .npy format. Use numpy.load to access its contents. 
+Note that the small datasets are stored using a .npy format. Use numpy.load to access its contents.
