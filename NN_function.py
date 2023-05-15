@@ -27,7 +27,7 @@ os.environ['OMP_NUM_THREADS'] = threads
 os.environ['openmp'] = 'True' '''
 
 
-def load_loss_function(loss_fun_name, path_to_sys_file=''):
+def load_loss_function(loss_fun_name, path_to_sys_file='', output_normalizer=None):
     if loss_fun_name == 'MSE':
         return tf.keras.losses.mean_squared_error
     elif loss_fun_name == 'ME':
@@ -49,7 +49,7 @@ def set_params_and_init_nn(model, data_in_name='', data_out_name='', path='NONE'
                     datapath=path,
                     scale_data_out=True,
                     pickle_load=pickle_load)
-    model.init_nn_model_dynamic(architecture=model.architecture, const_l_rate=True, custom_loss=not mse_flag)
+    model.init_nn_model_dynamic(arch_list=model.architecture, const_l_rate=True, custom_loss=not mse_flag)
     pass
 
 '''# PATHS to containers for small network
@@ -113,7 +113,7 @@ def NN_obj_based(dataset='slim',
     :return: pass. All data stored witin project folder.
     '''
     if arch is None:
-        arch=load_architecture(network_name)
+        arch = load_architecture(network_name)
 
     #proj_folder = os.path.abspath(os.path.join(os.getcwd(), os.pardir)) #cwd = current working dir, pardir = parent dir
     proj_folder = os.getcwd()
@@ -143,13 +143,15 @@ def NN_obj_based(dataset='slim',
 
     for loss_fun in loss_function_list:
 
-        loss = load_loss_function(loss_fun, path_to_sys_file=folder_hierarchy['sys_descriptions']['system_path'])
         nn_obj = NeuralNetwork()
         nn_obj.l_rate = l_rate
         #arch = [64, 128, 128, 128, 128, 128, 64] # adding additional layer of neurons
         nn_obj.architecture = arch
 
         #print(f'nn_obj arch: {nn_obj.architecture}')
+        loss = load_loss_function(loss_fun,
+                                  path_to_sys_file=folder_hierarchy['sys_descriptions']['system_path'],
+                                  output_normalizer=nn_obj.get_norm_output())
         nn_obj.loss_fn = loss
 
         folder_hierarchy['checkpoints']['model_folder_path'] = path_to_cp_folder + '/' + network_name + '/' \
@@ -224,14 +226,14 @@ def NN_obj_based(dataset='slim',
 NN_obj_based(dataset='slim',
              network_name='medium',
              arch=None,
-             remark='slim_low_lrate',
+             remark='testing_test',
              l_rate=None,
              batch_size=None,
              epochs=90,
              thresholds=[20, 10, 5, 3],
              loss_function_list=['SquaredLineFlowLoss'],
              sys_filename='IEEE33BusDSAL.xls',
-             train_model=False)
+             train_model=True)
 
 
 '''set_params_and_init_nn(nn_obj, data_in_name=input_data_name, data_out_name=output_data_name, pickle_load=True)
