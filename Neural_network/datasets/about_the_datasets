@@ -1,0 +1,9 @@
+A single dataset consists of two files, the inputs and outputs.
+
+There exists a single dataset for the small test network, it is trained for a wide interval [0.8, 1.2]
+
+for both the medium and large test networks, there exist two datasets. One trained for the slim dataset where load is
+varied within the interval [0.9, 1.1] and one for the wide load interval [0.8, 1.2]. The wide datasets to not state
+dataset width in the filename.
+
+Note that the small datasets are stored using a .npy format. Use numpy.load to access its contents. 
