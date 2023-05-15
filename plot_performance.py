@@ -6,6 +6,16 @@ from tabulate import tabulate
 
 
 def print_performance(performance_dict, loss_function_list, size, remark):
+
+    '''
+
+    :param performance_dict: the list of performance dictionaries from which performance is read.
+    :param loss_function_list: All loss functions to be included in the plot.
+    :param size: network size? (small, medium, large)
+    :param remark: Training sesstion specification. ex. '30batch'
+    :return: pass. Prints selected performance data after final epoch.
+    '''
+
     thresholds = ['20percent', '10percent', '5percent', '3percent']
     print(f'------------     Performance {size}_{remark}   ----------------')
     data = {}
@@ -41,7 +51,7 @@ def print_performance(performance_dict, loss_function_list, size, remark):
 cwd = os.getcwd()
 path = cwd + '/Neural_network/checkpoints/'
 network_size = 'medium'
-remark = 'slim_deeper_low_lrate'
+remark = '1e-4_50batch_400_epoch'
 #remark = 'baseline_slim''large_30batch' 'large_deep' 'large_low_lrate' #large_wide_baseline'
 
 loss_fun_list = ['MSE', 'CustomLoss', 'SquaredLineFlowLoss']#['MSE']#['MSE' , 'CustomLoss']

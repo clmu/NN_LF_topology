@@ -1,0 +1,64 @@
+This file describes how to use idun briefly.
+
+check out: https://www.hpc.ntnu.no/idun/
+
+Idun is a large cluster of computational resources accessed through login nodes. Do not run calculations directly from
+a login node. You need to submit a job to do this, it can be done either interactively or through SLURM the workload
+manager used by idun.
+
+Accessing idun:
+
+Make sure you are connected to NTNU either by being on campus or trough VPN.
+
+use ssh to access IDUN:
+
+ssh -X -l *USERNAME* login.stud.ntnu.no
+ssh -X -l *USERNAME* idun-login1.hpc.ntnu.no
+
+This is a unix environment, so unix commands must be used. cd *path* to open folder. ls -la to see folder contents.
+
+To transfer files:
+
+you can synchronise your GIT repo. This is a good alternative as no files are backed up on idun.
+
+Or do as i did, use this script: https://github.com/matsest/mount-idun to mount idun to your local machine.
+download this script, then run: sudo bash mount-idun.sh and enter what is prompted.
+- Now you can transfer your files to idun.
+
+
+To submit jobs:
+
+Note: a sample idun job is given in the file 'medium_baseline.slurm'
+
+    Interactive session
+        salloc --account=share-ie-iel --nodes=1 --partition=CPUQ --time=01:00:00 --ntasks-per-node=1 --mem=20000
+                #   Change params as needed.
+        then access node using: 'ssh  -X idun-xx-xx', test by running command xclock.
+
+
+    Through slurm:
+        Create job scripts like described here:  https://www.hpc.ntnu.no/idun/getting-started-on-idun/lessons-from-a-former-masters-student/
+        Submit job scribt using chmod u+x *filename*.slurm, sbatch *filename*.slurm
+
+        When submitting jobs requiring a viritual environment, you may need to restart your shell:
+            do this by adding: 'source /cluster/home/*USER*/.bash_profile' before activating viritual env.
+
+
+    Monitor jobs:
+        squeue -u *Username* or $USER
+        Cancelling: scancel *job_id*
+
+Generate viritual conda environment:
+
+    If a viritual environment exists: remove it: conda remove --name *ENVIRONMENT_NAME* --all
+
+    then:
+    conda create --name *ENVIRONMENT_NAME* python=3.10.8 tensorflow=2.11 keras tk pandas numpy matplotlib
+            # where required packages are listed at the end.
+
+    then:
+        Activate conda environment using 'conda activate *ENVIRONMENT_NAME*'
+
+    tip: use your own name as *ENVIRONMENT_NAME*
+
+

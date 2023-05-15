@@ -93,6 +93,25 @@ def NN_obj_based(dataset='slim',
                  loss_function_list=[None],
                  sys_filename='IEEE33BusDSAL.xls',
                  train_model=True):
+
+    '''
+    This is the most important function in this code project. It trains and stores NN models. Models are stored in
+    folders with names from this function. If the folders do not already exist the folders are generated upon function
+    execution.
+    :param dataset: 'slim' / '' determines what dataset to use [0.9, 1.1] / [0.8, 1.2]
+    :param network_name: 'small', 'medium', 'large'
+    :param arch: list describing NN architecture. If none provided, default values are used.
+    :param remark: Description of current training session. Useful for later performance comparison and data management.
+    :param l_rate: learning rate to be used by the NN model.
+    :param batch_size: The batch size used by the NN model.
+    :param epochs: Training epochs to be conducted.
+    :param thresholds: Thresholds for performane eval. default: [20, 10 5, 3]
+    :param loss_function_list: list of different loss functions to be used for training. Choose between losses described
+                                in thesis.
+    :param sys_filename: filename of the system description file within module LF_3bus
+    :param train_model: True/False. Saves time if objective is data eval of existing models.
+    :return: pass. All data stored witin project folder.
+    '''
     if arch is None:
         arch=load_architecture(network_name)
 
@@ -185,7 +204,7 @@ def NN_obj_based(dataset='slim',
                                    path=path_to_data,
                                    pickle_load=True)
             untrained_nn_list.append(nn_model)
-        print(f'Starting eval of {network_name}_{loss_fun}')
+        print(f'Starting eval of {network_name}_{loss_fun}_{remark}')
         epoch_performance_dictionaries_from_list = eval_nn_obj_epochs_list(untrained_nn_list,
                                                                            epochs,
                                                                            thresholds=thresholds,
@@ -200,6 +219,8 @@ def NN_obj_based(dataset='slim',
 
         test = 2
 
+        pass
+
 NN_obj_based(dataset='slim',
              network_name='medium',
              arch=None,
@@ -208,7 +229,7 @@ NN_obj_based(dataset='slim',
              batch_size=None,
              epochs=90,
              thresholds=[20, 10, 5, 3],
-             loss_function_list=['MSE', 'CustomLoss', 'SquaredLineFlowLoss'],
+             loss_function_list=['SquaredLineFlowLoss'],
              sys_filename='IEEE33BusDSAL.xls',
              train_model=False)
 
