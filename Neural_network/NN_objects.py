@@ -47,15 +47,17 @@ def pickle_load_obj(path='', filename=''):
     :param filename: Filename including extension in folde.
     :return: object to be loaded.
     '''
-    #f = codecs.open(path + filename, 'r', encoding='utf8')
-    #file = f.read()
-    #obj = pickle.load(file)
     f = open(path + filename, 'rb')
     obj = pickle.load(f)
     f.close()
     return obj
 
 def load_architecture(network_name):
+    '''
+    Function provides pre-defined NN archictecture lists based on 'network_name'
+    :param network_name: 'small', 'medium', 'large'
+    :return: list containing network architecture list.
+    '''
     network_name = network_name.split('_')[0]
     if network_name == 'small':
         return [6, 12, 12, 12, 6]
@@ -63,7 +65,13 @@ def load_architecture(network_name):
         return [64, 128, 128, 128, 64]
     elif network_name == 'large':
         return [136, 272, 272, 272, 136]
+    else:
+        return None
 class NeuralNetwork:
+
+    '''
+    Class containing a neural network and its related data.
+    '''
     def __init__(self):
         self.l_rate = None #set in function init_nn_model
         self.epochs = 150
@@ -85,16 +93,8 @@ class NeuralNetwork:
         #self.norm_output = 10
         self._norm_input = 2
         self._norm_output = 10
-    '''
-    def load_elk_objects(self, path_to_sys_sheet=None):
-        
-        if path_to_sys_sheet is None:
-            path_to_sys_sheet = '/home/clemens/PycharmProjects/NN_LF_Topology/LF_3bus/4 bus 1 gen.xls'
-        BusList, LineList = BuildSystem(path_to_sys_sheet)
-        self.data_obj = LoadFlow(BusList, LineList)
-        self.model_obj = LoadFlow(BusList, LineList)
-        pass
-    '''
+
+
     def set_norm_input(self, integer):
         self._norm_input = integer
         pass
@@ -112,7 +112,7 @@ class NeuralNetwork:
     def init_data(self, name_data_in, name_data_out, ver_frac=None, datapath='', scale_data_out=False, pickle_load=False):
 
         '''
-        Function to initialize data
+        Function to initialize data within a NeuralNetwork
         :param name_data_in: name of the input datafile including filename extension
         :param name_data_out: Name of the output datafile, including filename extension
         :param ver_frac:
@@ -136,39 +136,25 @@ class NeuralNetwork:
         self.t_data, self.t_sol = inputdata[learn_samples:] / self._norm_input, outputdata[learn_samples:]*o_scale
         pass
 
-    def init_nn_model_fixed(self):
-        initializer = self.initializer
-        loss_fn = self.loss_fn
-        self.tf_model = tf.keras.models.Sequential([
-            tf.keras.layers.Flatten(input_shape=(6,)),
-            # tf.keras.layers.Dense(6, activation='relu'),
-            tf.keras.layers.Dense(12, activation='relu', kernel_initializer=initializer),
-            tf.keras.layers.Dense(12, activation='relu', kernel_initializer=initializer),
-            tf.keras.layers.Dense(12, activation='relu', kernel_initializer=initializer),
-            tf.keras.layers.Dense(6, kernel_initializer=initializer)
-        ])
-
-        self.tf_model.compile(optimizer='adam',
-                              loss=loss_fn,
-                              metrics=['mean_absolute_percentage_error'])  # , 'accuracy'])
-        self.tf_model.summary()
-        pass
-
-    def init_nn_model_dynamic(self, architecture=None, const_l_rate=True, print_summary=False, custom_loss=False):
+    def init_nn_model_dynamic(self, arch_list=None, const_l_rate=True, print_summary=False, custom_loss=False):
 
         '''
         Function initializes and compiles a tensorflow NN object within the NeuralNetwork object.
-        :param architecture: list containing the amount of neurons in each layer including the input layer.
+        :param custom_loss: bool. States wether or not a custom loss funciton is to be used.
+                            Determines if eager execution is to be used.
+                            Note that eager execution increases training time significantly, however, it is required to
+                            calculate line flows which are essential for all custom loss functions.
+        :param print_summary: bool. States wether or not tf model summary should be printed.
+        :param arch_list: list containing the amount of neurons in each layer including the input layer.
                                 variable is stored in NeuralNetwork.
         :param const_l_rate: bool. variable specify wether or not a decaying learning rate should be used.
         :return:
         '''
 
-        if architecture is None:
+        if arch_list is None:
             raise Exception('No network architecture provided')
-        self.architecture = architecture
+        self.architecture = arch_list
         self.tf_model = tf.keras.models.Sequential()
-        #self.tf_model = CustomModel() #for more detailed access to control etc.
         self.tf_model.add(layers.Dense(self.architecture[1], activation='relu', input_shape=(self.architecture[0],)))
         self.tf_model.summary
 
@@ -198,10 +184,12 @@ class NeuralNetwork:
     def set_learning_rate_schedule(self, const_l_rate=False, l_rate=1e-3):
 
         '''
-        Function to set the learning rate for the neural network object.
+        Function to set the learning rate for the neural network object. decaying scedules are not yet used, but may give better
+        results once hyperparameter tuning is finished. Online sources recommend prioritizing hyperparam
+        tuning emphasizing training speed before using decaying learning rates.
         :param const_l_rate: bool to specify if a constant learning rate should be used.
         :param l_rate: the constant learning rate to be used.
-        :return:
+        :return: pass. Sets lRate within nn model.
         '''
 
         if const_l_rate:
@@ -223,7 +211,7 @@ class NeuralNetwork:
     def train_model(self, epochs=None, batch_size=None, checkpoints=False, cp_folder_path=None, save_freq=None):
 
         '''
-        Function to train the model.
+        Function to train the model. based on tf.model.fit
         :param epochs: [Optional] if other than specified within obj is to be used.
         :param batch_size: [optional]
         :param checkpoints: Bool to indicate if checkpoints should be stored during training
@@ -283,7 +271,7 @@ class NeuralNetwork:
         '''
         calculate model predicitons for all data in the test data and store them in self.model_sol
         Function also calculates percentage deviations from design value.
-        :return: pass
+        :return: pass. Stores all prediction accuracies within an object instance.
         '''
 
         verification_samples, verification_variables = np.shape(self.t_data)
@@ -304,28 +292,10 @@ class NeuralNetwork:
     def load_latest_pretrained_model(self, path):
         #loads the latest model weights of a pretrained model into the objects model.
         #Note that the layer architecture must be the same for this function to work.
+        #Function does not currently work.
         latest = tf.train.latest_checkpoint(path)
         self.tf_model.load_weights(latest)
         pass
-
-    '''
-    def generate_performance_data_dict(self, threshold=5):
-        
-        def find_affected_sets():
-            affected_predictions = set()
-            for index in self.performance_dict[threshold_key]['worsts']:
-                affected_predictions.add(index[0])
-            return len(affected_predictions)
-
-        threshold_key = str(threshold) + 'percent'
-
-        self.performance_dict[threshold_key] = {}
-        self.performance_dict[threshold_key]['averages'] = np.average(self.abs_percentage_pred_errors, axis=0)
-        self.performance_dict[threshold_key]['average'] = np.average(self.performance_dict[threshold_key]['averages'])
-        self.performance_dict[threshold_key]['worsts'] = np.argwhere(self.abs_percentage_pred_errors > threshold)
-        self.performance_dict[threshold_key]['affected_pred_sets_worst'] = find_affected_sets()
-
-        pass'''
 
     def generate_performance_data_dict_improved(self, threshold=[5]):
         '''
@@ -358,22 +328,4 @@ class NeuralNetwork:
 
         pass
 
-    def gen_loss_function(self):
-
-        '''
-        Function to generate a custom loss function for tensorflow.
-        :return:
-        '''
-
-        pass
-
-    def split_data_into_vomag_voang(self):
-
-        '''
-        Function to split training data into voltage magnitude and angle to train separate networks for
-        voltage magnitude and voltage angle predictions.
-        :return:
-        '''
-
-        pass
 
