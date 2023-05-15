@@ -92,65 +92,21 @@ def predict(list_of_models, input_data):
         time_list.append(time)
     return prediction_list, time_list
 
-def evaluate_checkpoints(actual_solutions, predictions):
+'''def evaluate_checkpoints(actual_solutions, predictions):
 
-    '''
+    
     Function to evaluate all predicitons using the actual solutions
     :param predictions: List of prediction matrices generated from different cps.
     :param actual_solutions: actual solution.
     :return: list of lists containing the accuracies of all datapoints.
-    '''
+    
     accuracies = []
     worst_accuracies = []
     for prediction in predictions:
         avg_accuracy, worst_accuracy = eval_model_performance(actual_solutions, prediction, threshold=3)
         accuracies.append(avg_accuracy)
         worst_accuracies.append(worst_accuracy)
-    return [accuracies, worst_accuracies]
-
-'''
-def evaluate_cps_obj(cps, path_to_data='nopath', cp_folder='nofolder', architecture=None, thresholds=None):
-
- 
-    def gen_filename_ext(number):
-        number = str(number)
-        while len(number) < 4:
-            number = '0' + number
-        number = 'cp_' + number  # + '.index'
-        return number
-
-    cp_path = path_to_data + cp_folder
-    model_numbers = np.arange(1, cps + 1)
-    file_exts = []
-    models = []
-    for model_number in model_numbers:
-        models.append(NN())
-        file_exts.append(gen_filename_ext(model_number))
-
-    for model in models:
-        model.epochs = 30
-        model.batch_size = 20
-        model.initializer = tf.keras.initializers.glorot_uniform(seed=0)
-        model.init_data('simple data.npy',
-                        'simple o data.npy',
-                        0.2,
-                        datapath=path_to_data,
-                        scale_data_out=True)
-        model.loss_fn = tf.keras.losses.MSE
-        model.init_nn_model_dynamic(architecture=architecture, const_l_rate=True)
-
-    #thresholds = [20, 10, 5, 3]
-    avg_perc_dev = np.zeros(len(models), dtype=float)
-    performance_dicts = []
-    for index in range(len(models)):
-        models[index].tf_model.load_weights(cp_path + file_exts[index])
-        models[index].model_pred()
-        for threshold in thresholds:
-            models[index].generate_performance_data_dict(threshold)
-        performance_dicts.append(models[index].performance_dict)
-        avg_perc_dev[index] = models[index].performance_dict['3percent']['average']
-
-    return performance_dicts'''
+    return [accuracies, worst_accuracies]'''
 
 
 def gen_filename_ext(number):

@@ -3,6 +3,11 @@ import time
 import tensorflow as tf
 from Neural_network.NN_objects import pickle_load_obj as load
 
+
+#initial script to analyze neural network models.
+
+
+
 def verification_predictions(verification_input_data, model):
 
     '''

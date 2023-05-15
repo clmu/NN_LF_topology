@@ -7,6 +7,10 @@ from keras.engine import data_adapter
 
 class CustomModel(tf.keras.Sequential):
 
+    '''
+    Started developing this model in an attempt to enable graph execution with the custom loss functions.
+    '''
+
     def train_step(self, data):
         """The logic for one training step.
         This method can be overridden to support custom training logic.
