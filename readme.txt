@@ -1,16 +1,3 @@
-Copyright (c) 2023, Clemens M. Müller, NTNU
-
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright notice,
-      this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
-
 About the repository:
 
 Code repository for the work on my masters project at NTNU: "TITLE", supervised by: Olav B. Fosso
