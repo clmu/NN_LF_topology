@@ -23,3 +23,6 @@ All checkpoints for neural networks trained during the work on this thesis are a
 
 And finally: Some of the training sessions in this thesis have been conducted on Idun. For a quick introduction to
 Idun, see how2idun
+
+Should you decide to attempt designing your own neural network, be sure to check out googles playbook on tuning neural
+networks: https://github.com/google-research/tuning_playbook
