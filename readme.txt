@@ -26,3 +26,5 @@ Idun, see how2idun
 
 Should you decide to attempt designing your own neural network, be sure to check out googles playbook on tuning neural
 networks: https://github.com/google-research/tuning_playbook
+
+Repository dependencies: python=3.10.8 tensorflow=2.11 keras tk pandas numpy matplotlib _pickle (as pickle) math
